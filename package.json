@@ -1,0 +1,39 @@
+{
+  "name": "three-boilerplate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "./node_modules/.bin/cake build",
+    "clean": "./node_modules/.bin/cake clean",
+    "watch": "node_modules/.bin/watchify ./src/index.coffee -t coffeeify -d -o bundle.js -v",
+    "linkHooks": "./node_modules/.bin/cake linkHooks",
+    "checkStyle": "./node_modules/.bin/coffeelint Cakefile .",
+    "prepublish": "npm test && npm run checkStyle"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "PEP": "brickify/PEP",
+    "browserify": "^11.2.0",
+    "browserify-data": "^0.2.0",
+    "coffee-script": "^1.10.0",
+    "coffeeify": "^1.1.0",
+    "es6-collections": "^0.5.5",
+    "es6-collections-iterators": "^0.2.1",
+    "es6-promise": "^3.0.2",
+    "jquery": "^2.1.4",
+    "lodash": "^3.10.1",
+    "meshlib": "^0.7.3",
+    "mkdirp": "^0.5.1",
+    "readdirp": "^2.0.0",
+    "stl-parser": "^0.10.0",
+    "three": "^0.72.0",
+    "three-pointer-controls": "^0.5.3",
+    "winston": "^1.1.0"
+  },
+  "devDependencies": {
+    "coffeelint": "^1.13.0",
+    "watchify": "^3.4.0"
+  }
+}
