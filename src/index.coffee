@@ -17,13 +17,32 @@ material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } )
 cube = new THREE.Mesh( geometry, material )
 scene.add( cube )
 
+material = new THREE.MeshBasicMaterial( { color: 0xff0000 } )
+cube2 = new THREE.Mesh( geometry, material )
+scene.add( cube2 )
+
 camera.position.z = 5
+
+console.log(cube2)
+
+cube2Translation = 0.05
 
 render = ->
 	requestAnimationFrame( render )
 
 	cube.rotation.x += 0.1
 	cube.rotation.y += 0.1
+
+	cube2.rotation.x += 0.01
+	cube2.rotation.y += 0.01
+
+	if cube2.position.x > 2.0 || cube2.position.x < -2.0 ||
+		cube2.position.y > 2.0 || cube2.position.y < -2.0
+	  cube2Translation *= -1.0
+
+	cube2.translateX(cube2Translation)
+
+
 
 	renderer.render(scene, camera)
 
