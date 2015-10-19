@@ -8,6 +8,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-browserify'
+  grunt.loadNpmTasks 'grunt-coffeelint'
 
   grunt.initConfig
     browserify:
@@ -35,6 +36,14 @@ module.exports = (grunt) ->
         'public/js/bundle.js'
       ]
 
+    coffeelint:
+      development:
+        files:
+          src: ['src/**/*.coffee']
+        options:
+          force: true
+          configFile: './coffeelint.json'
+
     watch:
       options:
         livereload: true
@@ -55,6 +64,7 @@ module.exports = (grunt) ->
 
 
   grunt.registerTask 'build:development', [
+    'coffeelint:development'
     'browserify:development'
     'copy:development'
   ]
