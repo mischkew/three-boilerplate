@@ -2,13 +2,21 @@
 
 'use strict'
 
+winston = require './tasks/winston'
+linkHooks = require './tasks/linkHooks'
+
 module.exports = (grunt) ->
+  # load third-party tasks
   grunt.loadNpmTasks 'grunt-contrib-connect'
   grunt.loadNpmTasks 'grunt-contrib-copy'
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-coffeelint'
+
+  # setup custom tasks
+  winston(grunt)
+  linkHooks(grunt)
 
   grunt.initConfig
     browserify:
@@ -62,6 +70,14 @@ module.exports = (grunt) ->
           base: 'public'
           livereload: true
 
+    winston:
+      buildLog:
+        options:
+          console:
+            humanReadableUnhandledException: true
+            colorize: true
+            level: 'debug'
+
 
   grunt.registerTask 'build:development', [
     'coffeelint:development'
@@ -70,6 +86,8 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask 'development', [
+    'winston' # setup loggers
+    'linkHooks'
     'build:development'
     'connect:development'
     'watch:development'
