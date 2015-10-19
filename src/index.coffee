@@ -1,6 +1,8 @@
 THREE = require 'three'
 $ = require 'jquery'
 
+console.log 'setup'
+
 scene = new THREE.Scene()
 camera = new THREE.PerspectiveCamera(
   75
