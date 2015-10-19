@@ -2,6 +2,10 @@
     "arrow_spacing": {
         "level": "error"
     },
+    "braces_spacing": {
+        "spaces": 1,
+        "level": "warn"
+    },
     "camel_case_classes": {
         "level": "error"
     },
@@ -23,7 +27,7 @@
         "level": "error"
     },
     "empty_constructor_needs_parens": {
-        "level": "ignore"
+        "level": "error"
     },
     "eol_last": {
       "level": "error"
@@ -45,8 +49,8 @@
         "level": "ignore"
     },
     "newlines_after_classes": {
-        "value": 3,
-        "level": "ignore"
+        "value": 2,
+        "level": "warn"
     },
     "no_backticks": {
         "level": "warn"

@@ -5,6 +5,7 @@ npm-debug.log
 *.js
 *.js.map
 !/public/libs/**/*.js
+build/
 *.css
 /modelCache
 /doc
