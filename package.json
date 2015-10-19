@@ -10,7 +10,7 @@
     "start": "node_modules/.bin/grunt development",
     "linkHooks": "./node_modules/.bin/grunt linkHooks",
     "checkStyle": "./node_modules/.bin/coffeelint -f coffeelint.json ./src/*",
-    "test": "./node_modules/.bin/grunt mochaTest",
+    "test": "./node_modules/.bin/grunt test",
     "test:watch": "./node_modules/.bin/grunt test:watch"
   },
   "author": "",
