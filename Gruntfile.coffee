@@ -13,6 +13,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-browserify'
   grunt.loadNpmTasks 'grunt-coffeelint'
+  grunt.loadNpmTasks 'grunt-mocha-test'
 
   # setup custom tasks
   winston(grunt)
@@ -53,14 +54,24 @@ module.exports = (grunt) ->
           configFile: './coffeelint.json'
 
     watch:
-      options:
-        livereload: true
       development:
+        options:
+          livereload: true
         files: [
           'src/**/*'
         ]
         tasks: [
           'build:development'
+        ]
+      test:
+        # options:
+          # spawn: false
+        files: [
+          'src/**/*'
+          'test/**/*'
+        ]
+        tasks: [
+          'test'
         ]
 
     connect:
@@ -78,6 +89,13 @@ module.exports = (grunt) ->
             colorize: true
             level: 'debug'
 
+    mochaTest:
+      test:
+        options:
+          reporter: 'spec'
+          require: 'coffee-script/register'
+        src: ['test/**/*.coffee']
+
 
   grunt.registerTask 'build:development', [
     'coffeelint:development'
@@ -91,6 +109,15 @@ module.exports = (grunt) ->
     'build:development'
     'connect:development'
     'watch:development'
+  ]
+
+  grunt.registerTask 'test', [
+    'mochaTest:test'
+  ]
+
+  grunt.registerTask 'test:watch', [
+    'test',
+    'watch:test'
   ]
 
   grunt.registerTask 'default', [
