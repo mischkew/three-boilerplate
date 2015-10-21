@@ -57,6 +57,7 @@ module.exports = (grunt) ->
       development:
         options:
           livereload: true
+          spawn: false
         files: [
           'src/**/*'
         ]
