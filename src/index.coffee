@@ -3,6 +3,7 @@ require('jquery-ui')
 THREE = require 'three'
 $ = require 'jquery'
 loader = require './loadModel'
+coplanarFaces = require './coplanarFaces'
 
 
 ### SCENE SETUP ###
@@ -33,7 +34,7 @@ _loadModel = loader.loadModel root, camera, scene
 
 # some scene objects
 geometry = new THREE.BoxGeometry(1, 1, 1)
-material = new THREE.MeshBasicMaterial( { color: 0xff0000 } )
+material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } )
 
 cube2 = new THREE.Mesh( geometry, material )
 cube2Translation = 0.05
@@ -104,4 +105,7 @@ $(->
   view3d.append renderer.domElement
 
   render()
+
+  #console.log(true)
+  #console.log(coplanarFaces.test123())
 )

@@ -76,7 +76,8 @@ parse = (parent, camera, scene) -> (event) ->
 
           # geometry = new THREE.BoxGeometry(1, 1, 1)
           geometry = toStandardGeometry modelObject
-          material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+          material =
+            new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true })
           mesh = new THREE.Mesh(geometry, material)
           mesh.geometry.computeBoundingSphere()
           mesh.geometry.computeFaceNormals()
