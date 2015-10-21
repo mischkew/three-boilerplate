@@ -14,35 +14,82 @@ camera = new THREE.PerspectiveCamera(
 renderer = new THREE.WebGLRenderer()
 renderer.setSize( window.innerWidth, window.innerHeight )
 
-geometry = new THREE.BoxGeometry(1, 1, 1)
-material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-cube = new THREE.Mesh(geometry, material)
-scene.add(cube)
 
-material = new THREE.MeshBasicMaterial( { color: 0xff0000 } )
-cube2 = new THREE.Mesh( geometry, material )
-scene.add( cube2 )
+
+
+edgeSequence1 =
+  vertices: [ new THREE.Vector3( -3, -3, 0 )
+    new THREE.Vector3(  3, -3, 0 )
+    new THREE.Vector3(  3,  3, 0 )
+    new THREE.Vector3( -3,  3, 0 )
+  ]
+  area: null
+  hole: null
+
+edgeSequence2 =
+  vertices: [ new THREE.Vector3( -1, -1, 0 )
+    new THREE.Vector3(  1, -1, 0 )
+    new THREE.Vector3(  1,  1, 0 )
+    new THREE.Vector3( -1,  1, 0 )
+  ]
+  area: null
+  hole: null
+
+shape1 = [ edgeSequence1, edgeSequence2 ]
+
+myObject = [ shape1 ]
+
+for shape in myObject
+  maximumIndex = null
+
+  for sequence, sequenceIndex in shape
+    sequence.area += vertex.x *
+      sequence.vertices[ ( i + 1 ) %% sequence.vertices.length ].y -
+      sequence.vertices[ ( i + 1 ) %% sequence.vertices.length ].x *
+      vertex.y for vertex, i in sequence.vertices
+    sequence.area *= 0.5
+    maximumIndex = sequenceIndex if not shape[maximumIndex]? or
+      shape[maximumIndex]?.area < sequence.area
+    sequence.hole = true
+
+  shape[ maximumIndex ]?.hole = false
+
+
+
+
+for shape, shapeInd in myObject
+  console.log "shape #{shapeInd}"
+  for sequence, sequenceInd in shape
+    console.log "sequence #{sequenceInd}"
+    console.log "area = #{sequence.area}"
+    console.log "hole = #{sequence.hole}"
+
+
+
+
+for shape in myObject
+
+  for sequence in shape
+    geometry = new THREE.Geometry()
+
+    for vertex, vertexInd in sequence.vertices
+      geometry.vertices.push( vertex )
+
+      if vertexInd >= 2
+        face = new THREE.Face3( 0, vertexInd - 1, vertexInd )
+        geometry.faces.push( face )
+
+    material = new THREE.MeshBasicMaterial(
+      color: if sequence.hole then 0xff0000 else 0x00ff00 )
+    mesh = new THREE.Mesh( geometry, material )
+    scene.add( mesh )
+
 
 camera.position.z = 5
 
-console.log(cube2)
-
-cube2Translation = 0.05
 
 render = ->
   requestAnimationFrame(render)
-
-  cube.rotation.x += 0.1
-  cube.rotation.y += 0.1
-
-  cube2.rotation.x += 0.05
-  cube2.rotation.y += 0.05
-
-  if cube2.position.x > 2.0 or cube2.position.x < -2.0 or
-  cube2.position.y > 2.0 or cube2.position.y < -2.0
-    cube2Translation *= -1.0
-
-  cube2.translateX(cube2Translation)
 
   renderer.render(scene, camera)
 
