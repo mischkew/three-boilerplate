@@ -9,7 +9,7 @@
     "clean": "./node_modules/.bin/grunt clean",
     "start": "node_modules/.bin/grunt development",
     "linkHooks": "./node_modules/.bin/grunt linkHooks",
-    "checkStyle": "./node_modules/.bin/coffeelint -f coffeelint.json ./src/*",
+    "checkStyle": "./node_modules/.bin/grunt coffeelint",
     "test": "./node_modules/.bin/grunt test",
     "test:watch": "./node_modules/.bin/grunt test:watch"
   },
@@ -21,6 +21,7 @@
     "es6-collections-iterators": "^0.2.1",
     "es6-promise": "^3.0.2",
     "jquery": "^2.1.4",
+    "jquery-ui": "^1.10.5",
     "lodash": "^3.10.1",
     "meshlib": "^0.7.3",
     "mkdirp": "^0.5.1",

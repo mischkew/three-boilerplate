@@ -29,6 +29,11 @@ module.exports = (grunt) ->
           transform: ['coffeeify']
           browserifyOptions:
             debug: true
+            extensions: [
+              '.js',
+              '.jsx',
+              '.coffee'
+            ]
 
     copy:
       development:

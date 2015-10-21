@@ -3,7 +3,7 @@ meshlib = require 'meshlib'
 stlParser = require 'stl-parser'
 
 
-module.exports = (parent, camera, scene) -> (event) ->
+module.exports.loadModel = (parent, camera, scene) -> (event) ->
   return load event
     .then parse(parent, camera, scene)
 
@@ -53,6 +53,7 @@ toStandardGeometry = (modelObject) ->
 
 parse = (parent, camera, scene) -> (event) ->
   fileContent = event.target.result
+
   return new Promise (resolve, reject) ->
     parserInstance = stlParser(fileContent)
 
@@ -70,7 +71,7 @@ parse = (parent, camera, scene) -> (event) ->
         .buildFaceVertexMesh()
         .getObject()
         .then (modelObject) ->
-          if (parent.children.length > 0)
+          while (parent.children.length > 0)
             parent.remove parent.children[0]
 
           # geometry = new THREE.BoxGeometry(1, 1, 1)
@@ -82,10 +83,12 @@ parse = (parent, camera, scene) -> (event) ->
           mesh.geometry.computeVertexNormals()
           parent.add mesh
 
-          zoomTo geometry.boundingSphere, camera, scene
+          resolve geometry
+
+          # zoomTo geometry.boundingSphere, camera, scene
 
 
-zoomTo = (boundingSphere, camera, scene) ->
+module.exports.zoomTo = (boundingSphere, camera, scene) ->
   radius = boundingSphere.radius
   center = boundingSphere.center
 
@@ -93,7 +96,6 @@ zoomTo = (boundingSphere, camera, scene) ->
   distanceToObject = radius / Math.sin(alpha)
 
   rv = camera.position.clone()
-  rv.sub controls.target if controls?
   rv = rv.normalize().multiplyScalar(distanceToObject)
   zoomAdjustmentFactor = 2.5
   rv = rv.multiplyScalar(zoomAdjustmentFactor)
