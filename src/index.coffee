@@ -1,5 +1,9 @@
 THREE = require 'three'
 $ = require 'jquery'
+require('jquery-ui')
+
+view3d = $( '#3d-view' )
+view3d.height '100%'
 
 console.log 'setup'
 
@@ -66,7 +70,6 @@ for shape, shapeInd in myObject
 
 
 
-
 for shape in myObject
 
   for sequence in shape
@@ -90,12 +93,30 @@ camera.position.z = 5
 
 render = ->
   requestAnimationFrame(render)
-
   renderer.render(scene, camera)
 
+setupRenderSize = ->
+  camera = new THREE.PerspectiveCamera(
+    75
+    view3d.width() / view3d.height()
+    0.1
+    1000
+  )
+  camera.position.z = 5
+  renderer.setSize( view3d.width(), view3d.height() )
+
+
+$(window).resize ->
+  setupRenderSize()
 
 # on load render
 $(->
-  document.body.appendChild( renderer.domElement )
+  view3d = $( '#3d-view' )
+  view3d.height '100%'
+  setupRenderSize()
+  view3d.append $( renderer.domElement )
+  $('#slider').slider({
+    orientation: 'vertical'
+    })
   render()
 )
