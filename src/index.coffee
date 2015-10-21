@@ -1,5 +1,6 @@
 THREE = require 'three'
 $ = require 'jquery'
+require('jquery-ui')
 
 view3d = $( '#3d-view' )
 view3d.height '100%'
@@ -31,6 +32,8 @@ camera.position.z = 5
 console.log(cube2)
 
 cube2Translation = 0.05
+
+
 
 
 render = ->
@@ -69,5 +72,8 @@ $(->
   view3d.height '100%'
   setupRenderSize()
   view3d.append $( renderer.domElement )
+  $('#slider').slider({
+    orientation: 'vertical'
+    })
   render()
 )
