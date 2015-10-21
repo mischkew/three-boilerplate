@@ -84,7 +84,7 @@ parse = (parent, camera, scene) -> (event) ->
           mesh.geometry.computeVertexNormals()
           parent.add mesh
 
-          resolve geometry
+          resolve { geometry, model }
 
           # zoomTo geometry.boundingSphere, camera, scene
 

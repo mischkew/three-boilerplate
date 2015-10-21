@@ -4,6 +4,7 @@ THREE = require 'three'
 $ = require 'jquery'
 loader = require './loadModel'
 coplanarFaces = require './coplanarFaces'
+meshlib = require 'meshlib'
 
 
 ### SCENE SETUP ###
@@ -33,6 +34,8 @@ _loadModel = loader.loadModel root, camera, scene
 
 
 # some scene objects
+model = new meshlib.Model()
+models = []
 geometry = new THREE.BoxGeometry(1, 1, 1)
 material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } )
 
@@ -89,8 +92,12 @@ $(->
   $('body')
     .on 'drop', (event) ->
       _loadModel event.originalEvent
-        .then (geometry) ->
-          loader.zoomTo geometry.boundingSphere, camera, scene
+        .then (obj) ->
+          geo = obj.geometry
+          model = obj.model
+          console.log model
+          loader.zoomTo geo.boundingSphere, camera, scene
+          models = coplanarFaces.findCoplanarFaces model
       stopEvent event
     .on 'dragenter', stopEvent
     .on 'dragleave', stopEvent
@@ -105,7 +112,4 @@ $(->
   view3d.append renderer.domElement
 
   render()
-
-  #console.log(true)
-  #console.log(coplanarFaces.test123())
 )
