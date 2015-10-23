@@ -28,6 +28,7 @@
     "readdirp": "^2.0.0",
     "stl-parser": "^0.10.0",
     "three": "^0.72.0",
+    "three-orbit-controls": "^71.1.0",
     "three-pointer-controls": "^0.5.3",
     "winston": "^1.1.0"
   },
