@@ -102,7 +102,7 @@ drawCoplanarMeshes = (models) ->
   for geom in geoms
     #console.log geom.vertices[0]
     mesh = new THREE.Mesh(geom)
-    mesh.material.side = 2
+    #mesh.material.side = 2
     meshes.push(mesh)
     root.add mesh
 

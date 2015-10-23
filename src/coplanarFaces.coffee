@@ -4,20 +4,27 @@ meshlib = require 'meshlib'
 CoplanarFaces =
 
   isCoplanar: (face1, face2, threshold) ->
-    plane1 = new THREE.Plane()
-    .setFromNormalAndCoplanarPoint( face1.normal, face1.vertices[0] )
-    plane2 = new THREE.Plane()
-    .setFromNormalAndCoplanarPoint( face2.normal, face2.vertices[0] )
-    return floatEqual( plane1.constant, plane2.constant, threshold ) and
-    plane1.parallelTo( plane2, threshold )
+    normal1 = new THREE.Vector3(face1.normal.x, face1.normal.y, face1.normal.z)
+    normal2 = new THREE.Vector3(face2.normal.x, face2.normal.y, face2.normal.z)
+    #console.log normal1.length() + ' ' + normal2.length() + ' ' +
+    #  normal1.angleTo(normal2)
+    return normal1.angleTo(normal2) <= threshold
+    # plane1 = new THREE.Plane()
+    # .setFromNormalAndCoplanarPoint( face1.normal, face1.vertices[0] )
+    # plane2 = new THREE.Plane()
+    # .setFromNormalAndCoplanarPoint( face2.normal, face2.vertices[0] )
+    # return floatEqual( plane1.constant, plane2.constant, threshold ) and
+    # plane1.parallelTo( plane2, threshold )
 
   edgeAdjacent: (face1, face2, index1, index2) ->
-    return face1.vertices[index1] is face2.vertices[index2] and
-      face1.vertices[(index1 + 1) % 3] is face2.vertices[(index2 + 1) % 3]
+    return (@isSameVec face1.vertices[index1], face2.vertices[index2]) and
+      (@isSameVec face1.vertices[(index1 + 1) % 3],
+      face2.vertices[(index2 + 1) % 3])
 
   edgeReverseAdjacent: (face1, face2, index1, index2) ->
-    return face1.vertices[index1] is face2.vertices[(index2 + 1) % 3] and
-      face1.vertices[(index1 + 1) % 3] is face2.vertices[index2]
+    return (@isSameVec face1.vertices[index1],
+      face2.vertices[(index2 + 1) % 3]) and
+      (@isSameVec face1.vertices[(index1 + 1) % 3], face2.vertices[index2])
 
   isAdjacent: (face1, face2) ->
     for index1 in [0..2]
@@ -46,19 +53,6 @@ CoplanarFaces =
   test123: ->
     return true
 
-  # calculateSurfaceArea: (vertices) ->
-  #   Δ1X = vertices[1].x - vertices[0].x
-  #   Δ1Y = vertices[1].y - vertices[0].y
-  #   Δ1Z = vertices[1].z - vertices[0].z
-  #   Δ2X = vertices[2].x - vertices[0].x
-  #   Δ2Y = vertices[2].y - vertices[0].y
-  #   Δ2Z = vertices[2].z - vertices[0].z
-  #   x = (Δ1Y * Δ2Z) - (Δ1Z * Δ2Y)
-  #   y = (Δ1Z * Δ2X) - (Δ1X * Δ2Z)
-  #   z = (Δ1X * Δ2Y) - (Δ1Y * Δ2X)
-
-    return 0.5 * Math.sqrt (x * x) + (y * y) + (z * z)
-
   findCoplanarFaces: (model) ->
 
     faces = model.model.getFaces()
@@ -69,16 +63,26 @@ CoplanarFaces =
     #for face in faces
     #  console.log @calculateSurfaceArea face.vertices
 
+    #console.log @isSameFace(faces[0], faces[0])
+
     searchCoplanarFaces = (face1, planarModel) =>
 
       planarModel.push face1
       faces.splice(faces.indexOf(face1), 1)
 
-      for face2 in faces when (not @isSameFace(face1, face2)) and
-          @isAdjacent(face1, face2) and @isCoplanar(face1, face2, 5)
-        planarModel.push face2
-        faces.splice(faces.indexOf(face2), 1)
-        searchCoplanarFaces face2 planarModel
+      # for face2 in faces when (not @isSameFace(face1, face2)) and
+      #     @isAdjacent(face1, face2) and @isCoplanar(face1, face2, 0)
+      for face2 in faces #when
+        # (console.log 'face2 check: ' +
+        #     (not @isSameFace(face1, face2)) + ' ' +
+        #     (@isAdjacent(face1, face2)) + ' ' +
+        #     (@isCoplanar(face1, face2, 1)))
+        # 1 + 1
+        if face2? and (not @isSameFace(face1, face2)) and
+            @isAdjacent(face1, face2) and @isCoplanar(face1, face2, 0)
+          planarModel.push face2
+          faces.splice(faces.indexOf(face2), 1)
+          searchCoplanarFaces face2, planarModel
 
     while faces.length > 0
 
