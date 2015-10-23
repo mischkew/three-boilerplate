@@ -54,27 +54,32 @@ ShapesFinder =
       newShape = [edge[0]]
       newShape = newShape.concat(shape)
       added = true
-      console.log 'edge shape'
-      console.log shape
-      console.log newShape
     if not added and @sameVec shape[shape.length - 1], edge[0]
       newShape = newShape.concat([edge[1]])
       added = true
-      console.log 'shape edge'
-      console.log shape
-      console.log newShape
     return { newShape, added }
 
   addShape: (shape1, shape2) ->
     added = no
     newShape = shape1
-    if @sameVec shape2[shape2.length - 1], shape1[0]
-      newShape = shape2[0..-1]
-      newShape = newShape.concat(shape1)
+    if @sameVec( shape2[shape2.length - 1], shape1[0] )
+      newShape = shape2
+      newShape = newShape.concat(shape1[1..])
+      console.log 's2 s1'
+      console.log shape2
+      console.log shape1
+      console.log newShape
       added = true
-    if not added and @sameVec shape1[shape1.length - 1], shape2[0]
-      newShape = newShape.concat([shape2[1..]])
+    if not added and @sameVec( shape1[shape1.length - 1], shape2[0] )
+      newShape = shape1
+      newShape = newShape.concat(shape2[1..])
+      console.log 's1 s2'
+      console.log shape1
+      console.log shape2
+      console.log newShape
       added = true
+    if not added
+      console.log 'not added'
     return { newShape, added }
 
   mergeShapes: (inShapes) ->
@@ -88,27 +93,24 @@ ShapesFinder =
           shapes[i] = addShape.newShape
           added = addShape.added
       if not added
-        shapes.push [inShape]
+        shapes.push [inShape[0], inShape[1]]
     return shapes
 
   getShapes: (boundaryEdges) ->
-    # inShapes = []
+    shapes = @mergeShapes boundaryEdges
+    console.log shapes
+    #debugger
+    # shapes = [[boundaryEdges[0][0], boundaryEdges[0][1]]]
+    # boundaryEdges.splice(0, 1)
     # for edge in boundaryEdges
-    #   inShapes.push [edge[0], edge[1]]
-    # shapes = @mergeShapes inShapes
-
-
-    shapes = [[boundaryEdges[0][0], boundaryEdges[0][1]]]
-    boundaryEdges.splice(0, 1)
-    for edge in boundaryEdges
-      added = no
-      for shape, i in shapes
-        if not added
-          addEdge = @addEdge shape, edge
-          shapes[i] = addEdge.newShape
-          added = addEdge.added
-      if not added
-        shapes.push [edge[0], edge[1]]
+    #   added = no
+    #   for shape, i in shapes
+    #     if not added
+    #       addEdge = @addEdge shape, edge
+    #       shapes[i] = addEdge.newShape
+    #       added = addEdge.added
+    #   if not added
+    #     shapes.push [edge[0], edge[1]]
     return shapes
 
 
