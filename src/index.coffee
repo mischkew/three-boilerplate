@@ -54,8 +54,8 @@ render = ->
   #   root.children[0].rotation.y += 0.005
 
   for child in root.children
-    child.rotation.x += 0.01# * Math.random()
-    child.rotation.y += 0.01# * Math.random()
+    child.rotation.x += 0.02
+    child.rotation.y += 0.01
 
   cube2.rotation.x += 0.05
   cube2.rotation.y += 0.05
@@ -71,12 +71,8 @@ drawCoplanarMeshes = (models) ->
   while (root.children.length > 0)
     root.remove root.children[0]
 
-  #for pm in models
-  #  console.log coplanarFaces.calculateSurfaceArea pm[0].vertices
-
   geoms = []
-
-  #console.log models
+  meshes = []
 
   for model in models
     geometry = new THREE.Geometry()
@@ -90,29 +86,10 @@ drawCoplanarMeshes = (models) ->
       geometry.faces.push(new THREE.Face3(len - 3, len - 2, len - 1))
     geoms.push geometry
 
-  #console.log '-----'
-
-  #for ge in geoms
-  #  console.log (coplanarFaces.calculateSurfaceArea ge.vertices)
-
-  #console.log '-----'
-
-  meshes = []
-
   for geom in geoms
-    #console.log geom.vertices[0]
     mesh = new THREE.Mesh(geom)
-    #mesh.material.side = 2
     meshes.push(mesh)
     root.add mesh
-
-  #for me in meshes
-  #  console.log (coplanarFaces.calculateSurfaceArea me.geometry.vertices)
-
-  #console.log root
-  #console.log meshes
-
-  #render()
 
 setupRenderSize = (view3d) ->
   camera = new THREE.PerspectiveCamera(
@@ -143,12 +120,8 @@ $(->
         .then (obj) ->
           geo = obj.geometry
           model = obj.model
-          #console.log model
           loader.zoomTo geo.boundingSphere, camera, scene
           models = coplanarFaces.findCoplanarFaces model
-          # console.log models.length
-          # console.log 'AAAAA'
-          # console.log models[0]
           drawCoplanarMeshes(models)
           console.log 'END'
       stopEvent event

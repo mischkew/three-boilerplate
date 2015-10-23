@@ -6,15 +6,7 @@ CoplanarFaces =
   isCoplanar: (face1, face2, threshold) ->
     normal1 = new THREE.Vector3(face1.normal.x, face1.normal.y, face1.normal.z)
     normal2 = new THREE.Vector3(face2.normal.x, face2.normal.y, face2.normal.z)
-    #console.log normal1.length() + ' ' + normal2.length() + ' ' +
-    #  normal1.angleTo(normal2)
     return normal1.angleTo(normal2) <= threshold
-    # plane1 = new THREE.Plane()
-    # .setFromNormalAndCoplanarPoint( face1.normal, face1.vertices[0] )
-    # plane2 = new THREE.Plane()
-    # .setFromNormalAndCoplanarPoint( face2.normal, face2.vertices[0] )
-    # return floatEqual( plane1.constant, plane2.constant, threshold ) and
-    # plane1.parallelTo( plane2, threshold )
 
   edgeAdjacent: (face1, face2, index1, index2) ->
     return (@isSameVec face1.vertices[index1], face2.vertices[index2]) and
@@ -50,80 +42,34 @@ CoplanarFaces =
       return false
     return true
 
-  test123: ->
-    return true
+  isAdjacentAndCoplanar: (face1, face2, threshold) ->
+    return @isAdjacent(face1, face2) and @isCoplanar(face1, face2, threshold)
 
   findCoplanarFaces: (model) ->
 
     faces = model.model.getFaces()
-    console.log 'faces.length ' + faces.length
-    # console.log faces[0]
+    #console.log 'faces.length ' + faces.length
     planarModels = []
 
-    #for face in faces
-    #  console.log @calculateSurfaceArea face.vertices
+    faceUsed = []
+    for i in [0...faces.length]
+      faceUsed.push[false]
 
-    #console.log @isSameFace(faces[0], faces[0])
-
-    searchCoplanarFaces = (face1, planarModel) =>
+    searchCoplanarFaces = (face1, index1, planarModel) =>
 
       planarModel.push face1
-      faces.splice(faces.indexOf(face1), 1)
+      faceUsed[index1] = true
 
-      # for face2 in faces when (not @isSameFace(face1, face2)) and
-      #     @isAdjacent(face1, face2) and @isCoplanar(face1, face2, 0)
-      for face2 in faces #when
-        # (console.log 'face2 check: ' +
-        #     (not @isSameFace(face1, face2)) + ' ' +
-        #     (@isAdjacent(face1, face2)) + ' ' +
-        #     (@isCoplanar(face1, face2, 1)))
-        # 1 + 1
-        if face2? and (not @isSameFace(face1, face2)) and
-            @isAdjacent(face1, face2) and @isCoplanar(face1, face2, 0)
-          planarModel.push face2
-          faces.splice(faces.indexOf(face2), 1)
-          searchCoplanarFaces face2, planarModel
+      for face2, index2 in faces when index1 isnt index2 and
+          not faceUsed[index2] and
+          @isAdjacentAndCoplanar(face1, face2, 0.00001)
+        searchCoplanarFaces face2, index2, planarModel
 
-    while faces.length > 0
-
+    for face1, index1 in faces when not faceUsed[index1]
       planarModels.push []
-      searchCoplanarFaces(faces[0], planarModels[planarModels.length - 1])
+      searchCoplanarFaces face1, index1, planarModels[planarModels.length - 1]
 
-    console.log 'planarModels.length ' + planarModels.length
-
-    #for pm in planarModels
-    #  console.log @calculateSurfaceArea pm[0].vertices
-
-    # for planarModel, index in planarModels
-    #   if index < 2
-    #     console.log(planarModel[0])
-    #   tempmodel = meshlib.Model.fromFaces planarModel
-    #   tempmodel
-    #     .getObject()
-    #     .then (modelObject) ->
-    #       planarModels[index] = modelObject
-
+    #console.log 'planarModels.length ' + planarModels.length
     return planarModels
-
-  # findCoplanarFaces: (model) ->
-  #   models = []
-  #
-  #   for newface in model.model.getFaces()
-  #     foundCoplanarSubmodel = -1
-  #     for submodel in [0...models.length]
-  #       for face in models[submodel]
-  #         if @isAdjacent newface, face
-  #           if @isCoplanar newface, face, 0
-  #             if foundCoplanarSubmodel < 0
-  #               foundCoplanarSubmodel = submodel
-  #               models[submodel] push newface
-  #             else
-  #               #TODO: merge current submodel to saved submodel
-  #               1 + 1
-  #     if foundCoplanarSubmodel < 0
-  #       models.push [newface]
-  #
-  #   console.log 'end'
-  #   return models
 
 module.exports = CoplanarFaces
