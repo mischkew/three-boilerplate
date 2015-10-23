@@ -3,6 +3,7 @@ require('jquery-ui')
 THREE = require 'three'
 $ = require 'jquery'
 loader = require './loadModel'
+findShapes = require './findShapes'
 
 
 ### SCENE SETUP ###
@@ -47,9 +48,13 @@ root.add( cube2 )
 render = ->
   requestAnimationFrame(render)
 
-  if (root.children.length > 0)
-    root.children[0].rotation.x += 0.005
-    root.children[0].rotation.y += 0.005
+  # if (root.children.length > 0)
+  #   root.children[0].rotation.x += 0.005
+  #   root.children[0].rotation.y += 0.005
+
+  for child in root.children
+    child.rotation.x += 0.005
+    child.rotation.y += 0.005
 
   cube2.rotation.x += 0.05
   cube2.rotation.y += 0.05
@@ -88,8 +93,12 @@ $(->
   $('body')
     .on 'drop', (event) ->
       _loadModel event.originalEvent
-        .then (geometry) ->
-          loader.zoomTo geometry.boundingSphere, camera, scene
+        .then (obj) ->
+          geo = obj.geometry
+          model = obj.model
+          loader.zoomTo geo.boundingSphere, camera, scene
+          #shapes = findShapes.findShapes model
+          findShapes.getShapesOjects( model, root )
       stopEvent event
     .on 'dragenter', stopEvent
     .on 'dragleave', stopEvent
