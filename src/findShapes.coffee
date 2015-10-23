@@ -40,20 +40,10 @@ ShapesFinder =
     if @sameVec( shape2[shape2.length - 1], shape1[0] )
       newShape = shape2
       newShape = newShape.concat(shape1[1..])
-      console.log 's2 s1'
-      console.log shape2
-      console.log shape1
-      console.log newShape
-      console.log '-------'
       added = true
     if not added and @sameVec( shape1[shape1.length - 1], shape2[0] )
       newShape = shape1
       newShape = newShape.concat(shape2[1..])
-      console.log 's1 s2'
-      console.log shape1
-      console.log shape2
-      console.log newShape
-      console.log '-------'
       added = true
     if not added
       console.log 'not added'
@@ -83,12 +73,6 @@ ShapesFinder =
       mergeShapes = @mergeShapes shapes
       shapes = mergeShapes.shapes
       merged = mergeShapes.merged
-    # mergeShapes = @mergeShapes shapes
-    # shapes = mergeShapes.shapes
-    # console.log shapes
-    # console.log '---------round 2--------'
-    # mergeShapes = @mergeShapes shapes
-    # shapes = mergeShapes.shapes
     console.log shapes
     return shapes
 
