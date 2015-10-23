@@ -44,6 +44,7 @@ ShapesFinder =
       console.log shape2
       console.log shape1
       console.log newShape
+      console.log '-------'
       added = true
     if not added and @sameVec( shape1[shape1.length - 1], shape2[0] )
       newShape = shape1
@@ -52,6 +53,7 @@ ShapesFinder =
       console.log shape1
       console.log shape2
       console.log newShape
+      console.log '-------'
       added = true
     if not added
       console.log 'not added'
@@ -60,6 +62,7 @@ ShapesFinder =
   mergeShapes: (inShapes) ->
     shapes = [inShapes[0]]
     inShapes.splice(0, 1)
+    merged = no
     for inShape in inShapes
       added = no
       for shape, i in shapes
@@ -67,12 +70,25 @@ ShapesFinder =
           addShape = @addShape shape, inShape
           shapes[i] = addShape.newShape
           added = addShape.added
+          console.log shapes
       if not added
-        shapes.push [inShape[0], inShape[1]]
-    return shapes
+        shapes.push inShape
+      else
+        merged = yes
+    return { shapes, merged }
 
-  getShapes: (boundaryEdges) ->
-    shapes = @mergeShapes boundaryEdges
+  getShapes: (shapes) ->
+    merged = yes
+    while merged
+      mergeShapes = @mergeShapes shapes
+      shapes = mergeShapes.shapes
+      merged = mergeShapes.merged
+    # mergeShapes = @mergeShapes shapes
+    # shapes = mergeShapes.shapes
+    # console.log shapes
+    # console.log '---------round 2--------'
+    # mergeShapes = @mergeShapes shapes
+    # shapes = mergeShapes.shapes
     console.log shapes
     return shapes
 
