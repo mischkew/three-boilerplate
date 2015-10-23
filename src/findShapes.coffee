@@ -21,43 +21,18 @@ ShapesFinder =
     for face in model.model.getFaces()
       indexedFace = []
       for i in [0..2]
-        #console.log 'edge'
         j = i + 1
         if j > 2
           j = 0
         edge = [face.vertices[i], face.vertices[j]]
         found = no
-        edgesCopy = edges.slice()
-        i = 0
-        while i < edges.length
-          existingEdge = edges[i]
+        for existingEdge, i in edges.slice()
           if ShapesFinder.sameEdge edge, existingEdge
-            #console.log 'same edge'
             found = yes
             edges.splice(i, 1)
-          i++
-        # for existingEdge, i in edgesCopy
-        #   if ShapesFinder.sameEdge edge, existingEdge
-        #     #console.log 'same edge'
-        #     found = yes
-        #     edges.splice(i, 1)
         if not found
           edges.push edge
-    #result = edges
-    #console.log edges
     return edges
-
-  addEdge: (shape, edge) ->
-    added = no
-    newShape = shape
-    if @sameVec edge[1], shape[0]
-      newShape = [edge[0]]
-      newShape = newShape.concat(shape)
-      added = true
-    if not added and @sameVec shape[shape.length - 1], edge[0]
-      newShape = newShape.concat([edge[1]])
-      added = true
-    return { newShape, added }
 
   addShape: (shape1, shape2) ->
     added = no
@@ -99,18 +74,6 @@ ShapesFinder =
   getShapes: (boundaryEdges) ->
     shapes = @mergeShapes boundaryEdges
     console.log shapes
-    #debugger
-    # shapes = [[boundaryEdges[0][0], boundaryEdges[0][1]]]
-    # boundaryEdges.splice(0, 1)
-    # for edge in boundaryEdges
-    #   added = no
-    #   for shape, i in shapes
-    #     if not added
-    #       addEdge = @addEdge shape, edge
-    #       shapes[i] = addEdge.newShape
-    #       added = addEdge.added
-    #   if not added
-    #     shapes.push [edge[0], edge[1]]
     return shapes
 
 
@@ -120,9 +83,6 @@ ShapesFinder =
     shapes = @getShapes boundaryEdges.slice()
     console.log shapes
     return shapes
-    #debugger
-    #shapes = @getShapes(boundaryEdges)
-    #console.log shapes
 
   randomNum: ( max, min = 0 ) ->
     return Math.floor(Math.random() * (max - min) + min)
