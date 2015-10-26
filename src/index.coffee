@@ -77,6 +77,10 @@ stopEvent = (event) ->
   event.preventDefault()
   event.stopPropagation()
 
+test = (event) ->
+  event.preventDefault()
+  alert "Test"
+
 
 ### INITIALIZATION ###
 
@@ -85,6 +89,7 @@ $(->
   $('#slider').slider({
     orientation: 'vertical'
   })
+  $('#button').button().click(test)
   $('body')
     .on 'drop', (event) ->
       _loadModel event.originalEvent
