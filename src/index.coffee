@@ -1,68 +1,108 @@
-require('jquery-ui')
-
 THREE = require 'three'
 $ = require 'jquery'
-loader = require './loadModel'
+#OrbitControls = require('three-orbit-controls')(THREE)
+require('jquery-ui')
 
+view3d = $( '#3d-view' )
+view3d.height '100%'
 
-### SCENE SETUP ###
+console.log 'setup'
 
-# scene
 scene = new THREE.Scene()
-
-# renderer
-renderer = new THREE.WebGLRenderer()
-renderer.setSize( window.innerWidth, window.innerHeight )
-
-# camera
 camera = new THREE.PerspectiveCamera(
   75
   window.innerWidth / window.innerHeight
   0.1
   1000
 )
+
 camera.position.z = 5
 
-# root object
-root = new THREE.Object3D()
-scene.add(root)
+renderer = new THREE.WebGLRenderer()
+renderer.setSize( window.innerWidth, window.innerHeight )
 
-# configure model loading
-_loadModel = loader.loadModel root, camera, scene
+sceneGraph = new THREE.Object3D()
+scene.add( sceneGraph )
 
+myObject = null
 
-# some scene objects
-geometry = new THREE.BoxGeometry(1, 1, 1)
-material = new THREE.MeshBasicMaterial( { color: 0xff0000 } )
-
-cube2 = new THREE.Mesh( geometry, material )
-cube2Translation = 0.05
-
-root.add( cube2 )
+clearScene = ->
+  sceneGraph.children = []
 
 
 
-### HELPERS ###
+btnFindIntersection = (event) ->
+  event.preventDefault()
+
+  console.log 'calculations started'
+
+  if myObject? and (myObject.length is 2)
+    console.log 'intersections possible'
+    for plate1 in myObject
+      for plate2 in myObject
+            alert "testing #{plate1[0].name} with #{plate2[0].name}"
+  else
+    console.log 'not enough plates for intersections'
+
+
+
+drawLines = ( object ) ->
+  clearScene()
+
+  material = new THREE.LineBasicMaterial( color: 0xAAAAAA )
+  for plate in object
+    for sequence in plate
+      geometry = new THREE.Geometry()
+      for vertex in sequence.vertices
+        geometry.vertices.push( vertex )
+
+      geometry.vertices.push( sequence.vertices[0] )
+
+      line = new THREE.Line( geometry, material )
+      sceneGraph.add( line )
+
+
+btnScene1 = ( event ) ->
+  event.preventDefault()
+
+  edgeSequence1 =
+    vertices: [
+      new THREE.Vector3( -3, -3, 0 )
+      new THREE.Vector3(  3, -3, 0 )
+      new THREE.Vector3(  3,  3, 0 )
+      new THREE.Vector3( -3,  3, 0 )
+    ]
+    name: '1'
+    thickness: 2
+    hole: false
+    area: true
+
+  edgeSequence2 =
+    vertices: [
+      new THREE.Vector3(  3,  3, 0 )
+      new THREE.Vector3(  3, -3, 0 )
+      new THREE.Vector3(  4, -3, 0 )
+      new THREE.Vector3(  4,  3, 0 )
+    ]
+    name: '2'
+    thickness: 2
+    hole: false
+    area: true
+
+  plate1 = [ edgeSequence1 ]
+  plate2 = [ edgeSequence2 ]
+
+  myObject = [ plate1, plate2 ]
+
+  drawLines( myObject )
+
 
 render = ->
-  requestAnimationFrame(render)
-
-  if (root.children.length > 0)
-    root.children[0].rotation.x += 0.005
-    root.children[0].rotation.y += 0.005
-
-  cube2.rotation.x += 0.05
-  cube2.rotation.y += 0.05
-
-  if cube2.position.x > 2.0 or cube2.position.x < -2.0 or
-  cube2.position.y > 2.0 or cube2.position.y < -2.0
-    cube2Translation *= -1.0
-
-  cube2.translateX(cube2Translation)
+  requestAnimationFrame( render )
   renderer.render(scene, camera)
 
 
-setupRenderSize = (view3d) ->
+setupRenderSize = ->
   camera = new THREE.PerspectiveCamera(
     75
     view3d.width() / view3d.height()
@@ -73,40 +113,24 @@ setupRenderSize = (view3d) ->
   renderer.setSize( view3d.width(), view3d.height() )
 
 
-stopEvent = (event) ->
-  event.preventDefault()
-  event.stopPropagation()
-
-test = (event) ->
-  event.preventDefault()
-  alert "Test"
+$(window).resize ->
+  setupRenderSize()
 
 
-### INITIALIZATION ###
-
+# on load render
 $(->
-  # ui helpers
-  $('#slider').slider({
-    orientation: 'vertical'
-  })
-  $('#button').button().click(test)
-  $('body')
-    .on 'drop', (event) ->
-      _loadModel event.originalEvent
-        .then (geometry) ->
-          loader.zoomTo geometry.boundingSphere, camera, scene
-      stopEvent event
-    .on 'dragenter', stopEvent
-    .on 'dragleave', stopEvent
-    .on 'dragover', stopEvent
-
-  # rendering
-  view3d = $ '#3d-view'
+  view3d = $( '#3d-view' )
   view3d.height '100%'
-  setupRenderSize(view3d)
-  $(window).resize ->
-    setupRenderSize(view3d)
-  view3d.append renderer.domElement
+  setupRenderSize()
+  view3d.append $( renderer.domElement )
+  $('#btnScene1')
+    .button().click( btnScene1 ).text('Click for Scene')
+  $('#btnFindIntersection')
+    .button().click(btnFindIntersection).text('Find inter sections')
+
+
+  #controls = new OrbitControls( camera, renderer.domElement )
+  #controls.addEventListener( 'change', render )
 
   render()
 )
