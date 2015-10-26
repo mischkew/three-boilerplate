@@ -3,7 +3,7 @@ require('jquery-ui')
 THREE = require 'three'
 $ = require 'jquery'
 loader = require './loadModel'
-coplanarFaces = require './coplanarFaces'
+CoplanarFaces = require './coplanarFaces'
 meshlib = require 'meshlib'
 
 
@@ -43,7 +43,6 @@ cube2Translation = 0.05
 root.add( cube2 )
 
 
-
 ### HELPERS ###
 
 render = ->
@@ -67,29 +66,11 @@ render = ->
   cube2.translateX(cube2Translation)
   renderer.render(scene, camera)
 
-drawCoplanarMeshes = (models) ->
+drawCoplanarMeshes = (drawable) ->
   while (root.children.length > 0)
     root.remove root.children[0]
 
-  geoms = []
-  meshes = []
-
-  for model in models
-    geometry = new THREE.Geometry()
-    for face in model
-      for i in [0..2]
-        geometry.vertices.push(new THREE.Vector3(
-          face.vertices[i].x,
-          face.vertices[i].y,
-          face.vertices[i].z))
-      len = geometry.vertices.length
-      geometry.faces.push(new THREE.Face3(len - 3, len - 2, len - 1))
-    geoms.push geometry
-
-  for geom in geoms
-    mesh = new THREE.Mesh(geom)
-    meshes.push(mesh)
-    root.add mesh
+  root.add drawable
 
 setupRenderSize = (view3d) ->
   camera = new THREE.PerspectiveCamera(
@@ -121,8 +102,12 @@ $(->
           geo = obj.geometry
           model = obj.model
           loader.zoomTo geo.boundingSphere, camera, scene
-          models = coplanarFaces.findCoplanarFaces model
-          drawCoplanarMeshes(models)
+          coplanarFaces = new CoplanarFaces()
+          coplanarFaces.setDebug true
+          coplanarFaces.setThreshold 0.001
+          coplanarFaces.findCoplanarFaces model
+          coplanarFaces.setupDrawable()
+          drawCoplanarMeshes coplanarFaces.getDrawable()
           console.log 'END'
       stopEvent event
     .on 'dragenter', stopEvent
