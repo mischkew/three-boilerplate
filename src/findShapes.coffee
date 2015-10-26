@@ -45,8 +45,6 @@ ShapesFinder =
       newShape = shape1
       newShape = newShape.concat(shape2[1..])
       added = true
-    if not added
-      console.log 'not added'
     return { newShape, added }
 
   mergeShapes: (inShapes) ->
@@ -60,7 +58,6 @@ ShapesFinder =
           addShape = @addShape shape, inShape
           shapes[i] = addShape.newShape
           added = addShape.added
-          console.log shapes
       if not added
         shapes.push inShape
       else
@@ -73,27 +70,18 @@ ShapesFinder =
       mergeShapes = @mergeShapes shapes
       shapes = mergeShapes.shapes
       merged = mergeShapes.merged
-    console.log shapes
     return shapes
 
 
   findShapes: (model) ->
     boundaryEdges = @getBoundaryEdges model
-    console.log boundaryEdges
-    shapes = @getShapes boundaryEdges.slice()
-    console.log shapes
+    shapes = @getShapes boundaryEdges
     return shapes
 
-  randomNum: ( max, min = 0 ) ->
-    return Math.floor(Math.random() * (max - min) + min)
-
-  getShapesOjects: (model, scene) ->
-    while (scene.children.length > 0)
-      scene.remove scene.children[0]
-    objects3d = []
+  getDrawable: (model, scene) ->
+    drawable = new THREE.Object3D()
     shapes = @findShapes model
     for shape, i in shapes
-      lineColor = @randomNum(0xffffff, 0)
       switch (i % 6)
         when 0 then lineColor = 0xff0000 #red
         when 1 then lineColor = 0x00ff00 #green
@@ -101,16 +89,12 @@ ShapesFinder =
         when 3 then lineColor = 0xffff00 #yellow
         when 4 then lineColor = 0xff00ff #magenta
         when 5 then lineColor = 0x00ffff #cyan
-      #console.log 'lineColor = ' + lineColor
       material = new THREE.LineBasicMaterial({ color: lineColor })
       geometry = new THREE.Geometry()
-      #material.color = 0xffff00
       for vertex in shape
-        geometry.vertices.push vertex#edge[0]
-        #geometry.vertices.push edge[1]
+        geometry.vertices.push vertex
       obj = new THREE.Line( geometry, material )
-      objects3d.push obj
-      scene.add( obj )
-    return objects3d
+      drawable.add obj
+    return drawable
 
 module.exports = ShapesFinder

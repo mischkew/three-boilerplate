@@ -82,6 +82,10 @@ stopEvent = (event) ->
   event.preventDefault()
   event.stopPropagation()
 
+clearScene = ->
+  while (root.children.length > 0)
+    root.remove root.children[0]
+
 
 ### INITIALIZATION ###
 
@@ -98,7 +102,9 @@ $(->
           model = obj.model
           loader.zoomTo geo.boundingSphere, camera, scene
           #shapes = findShapes.findShapes model
-          findShapes.getShapesOjects( model, root )
+          drawable = findShapes.getDrawable( model, root )
+          clearScene()
+          root.add( drawable )
       stopEvent event
     .on 'dragenter', stopEvent
     .on 'dragleave', stopEvent
