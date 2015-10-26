@@ -4,6 +4,8 @@ THREE = require 'three'
 $ = require 'jquery'
 loader = require './loadModel'
 ShapesFinder = require './findShapes'
+CoplanarFaces = require './coplanarFaces'
+meshlib = require 'meshlib'
 
 
 ### SCENE SETUP ###
@@ -34,13 +36,12 @@ _loadModel = loader.loadModel root, camera, scene
 
 # some scene objects
 geometry = new THREE.BoxGeometry(1, 1, 1)
-material = new THREE.MeshBasicMaterial( { color: 0xff0000 } )
+material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } )
 
 cube2 = new THREE.Mesh( geometry, material )
 cube2Translation = 0.05
 
 root.add( cube2 )
-
 
 
 ### HELPERS ###
@@ -53,8 +54,8 @@ render = ->
   #   root.children[0].rotation.y += 0.005
 
   for child in root.children
-    child.rotation.x += 0.005
-    child.rotation.y += 0.005
+    child.rotation.x += 0.02
+    child.rotation.y += 0.01
 
   cube2.rotation.x += 0.05
   cube2.rotation.y += 0.05
@@ -66,6 +67,11 @@ render = ->
   cube2.translateX(cube2Translation)
   renderer.render(scene, camera)
 
+drawCoplanarMeshes = (drawable) ->
+  while (root.children.length > 0)
+    root.remove root.children[0]
+
+  root.add drawable
 
 setupRenderSize = (view3d) ->
   camera = new THREE.PerspectiveCamera(
@@ -103,12 +109,13 @@ $(->
           geo = obj.geometry
           model = obj.model
           loader.zoomTo geo.boundingSphere, camera, scene
-          shapesFinder = new ShapesFinder()
-          drawable = shapesFinder.getDrawable( model )
-          #drawable = findShapes.getDrawable( model, root )
-          #clearScene()
-          root.add( drawable )
-          setupRenderSize(view3d)
+          coplanarFaces = new CoplanarFaces()
+          #coplanarFaces.setDebug true
+          coplanarFaces.setThreshold 0.001
+          coplanarFaces.findCoplanarFaces model
+          coplanarFaces.setupDrawable()
+          drawCoplanarMeshes coplanarFaces.getDrawable()
+          console.log 'END'
       stopEvent event
     .on 'dragenter', stopEvent
     .on 'dragleave', stopEvent
