@@ -2,7 +2,7 @@ THREE = require 'three'
 $ = require 'jquery'
 require 'meshlib'
 
-ShapesFinder =
+class ShapesFinder
 
   sameVec: (vec1, vec2) ->
     vec1.x is vec2.x and vec1.y is vec2.y and vec1.z is vec2.z
@@ -15,10 +15,9 @@ ShapesFinder =
     (@sameVec(edge1[0], edge2[0]) or @sameVec(edge1[1], edge2[1])) or
     (@sameVec(edge1[0], edge2[1]) or @sameVec(edge1[1], edge2[0]))
 
-  getBoundaryEdges: (model) ->
+  getEdges: (faces) ->
     edges = []
-    borderEdge = []
-    for face in model.model.getFaces()
+    for face in faces
       indexedFace = []
       for i in [0..2]
         j = i + 1
@@ -27,61 +26,76 @@ ShapesFinder =
         edge = [face.vertices[i], face.vertices[j]]
         found = no
         for existingEdge, i in edges.slice()
-          if ShapesFinder.sameEdge edge, existingEdge
+          if @sameEdge edge, existingEdge
             found = yes
             edges.splice(i, 1)
         if not found
           edges.push edge
     return edges
 
-  addShape: (shape1, shape2) ->
+  mergeTwoEdges: (edge1, edge2) ->
     added = no
-    newShape = shape1
-    if @sameVec( shape2[shape2.length - 1], shape1[0] )
-      newShape = shape2
-      newShape = newShape.concat(shape1[1..])
+    newEdge = edge1
+    if @sameVec( edge2[edge2.length - 1], edge1[0] )
+      newEdge = edge2
+      newEdge = newEdge.concat(edge1[1..])
       added = true
-    if not added and @sameVec( shape1[shape1.length - 1], shape2[0] )
-      newShape = shape1
-      newShape = newShape.concat(shape2[1..])
+    if not added and @sameVec( edge1[edge1.length - 1], edge2[0] )
+      newEdge = newEdge.concat(edge2[1..])
       added = true
-    return { newShape, added }
+    return { newEdge, added }
 
-  mergeShapes: (inShapes) ->
-    shapes = [inShapes[0]]
-    inShapes.splice(0, 1)
+  mergeEdges: (inEdges) ->
+    edges = [inEdges[0]]
+    inEdges.splice(0, 1)
     merged = no
-    for inShape in inShapes
+    for inEdge in inEdges
       added = no
-      for shape, i in shapes
+      for edge, i in edges
         if not added
-          addShape = @addShape shape, inShape
-          shapes[i] = addShape.newShape
-          added = addShape.added
+          addEdge = @mergeTwoEdges edge, inEdge
+          edges[i] = addEdge.newEdge
+          added = addEdge.added
       if not added
-        shapes.push inShape
+        edges.push inEdge
       else
         merged = yes
-    return { shapes, merged }
+    return { edges, merged }
 
-  getShapes: (shapes) ->
+  getEdgeLoops: (edges) ->
     merged = yes
     while merged
-      mergeShapes = @mergeShapes shapes
-      shapes = mergeShapes.shapes
-      merged = mergeShapes.merged
+      mergeEdges = @mergeEdges edges
+      edges = mergeEdges.edges
+      merged = mergeEdges.merged
+    return edges
+
+
+  findEdgeLoops: (faces) ->
+    edges = @getEdges faces
+    edgeLoops = @getEdgeLoops edges
+    return edgeLoops
+
+  findShapesFromModel: (model) ->
+    shapes = []
+    faces = model.model.getFaces()
+    shape = @findEdgeLoops faces
+    shapes.push shape
     return shapes
 
-
-  findShapes: (model) ->
-    boundaryEdges = @getBoundaryEdges model
-    shapes = @getShapes boundaryEdges
+  findShapesFromFaceSets: ( faceSets ) ->
+    shapes = []
+    faces = model.model.getFaces()
+    for faceSet in faceSets
+      shape = @findEdgeLoops faceSet
+      shapes.push shape
     return shapes
 
-  getDrawable: (model, scene) ->
+  getDrawable: (model) ->
     drawable = new THREE.Object3D()
-    shapes = @findShapes model
-    for shape, i in shapes
+    shapes = @findShapesFromModel model
+    edgeLoops = shapes[0]
+    for edgeLoop, i in edgeLoops
       switch (i % 6)
         when 0 then lineColor = 0xff0000 #red
         when 1 then lineColor = 0x00ff00 #green
@@ -91,10 +105,11 @@ ShapesFinder =
         when 5 then lineColor = 0x00ffff #cyan
       material = new THREE.LineBasicMaterial({ color: lineColor })
       geometry = new THREE.Geometry()
-      for vertex in shape
+      for vertex in edgeLoop
         geometry.vertices.push vertex
       obj = new THREE.Line( geometry, material )
       drawable.add obj
     return drawable
+
 
 module.exports = ShapesFinder

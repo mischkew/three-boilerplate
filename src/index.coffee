@@ -3,7 +3,7 @@ require('jquery-ui')
 THREE = require 'three'
 $ = require 'jquery'
 loader = require './loadModel'
-findShapes = require './findShapes'
+ShapesFinder = require './findShapes'
 
 
 ### SCENE SETUP ###
@@ -94,6 +94,8 @@ $(->
   $('#slider').slider({
     orientation: 'vertical'
   })
+
+  view3d = $ '#3d-view'
   $('body')
     .on 'drop', (event) ->
       _loadModel event.originalEvent
@@ -101,17 +103,18 @@ $(->
           geo = obj.geometry
           model = obj.model
           loader.zoomTo geo.boundingSphere, camera, scene
-          #shapes = findShapes.findShapes model
-          drawable = findShapes.getDrawable( model, root )
-          clearScene()
+          shapesFinder = new ShapesFinder()
+          drawable = shapesFinder.getDrawable( model )
+          #drawable = findShapes.getDrawable( model, root )
+          #clearScene()
           root.add( drawable )
+          setupRenderSize(view3d)
       stopEvent event
     .on 'dragenter', stopEvent
     .on 'dragleave', stopEvent
     .on 'dragover', stopEvent
 
   # rendering
-  view3d = $ '#3d-view'
   view3d.height '100%'
   setupRenderSize(view3d)
   $(window).resize ->

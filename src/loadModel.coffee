@@ -76,12 +76,16 @@ parse = (parent, camera, scene) -> (event) ->
 
           # geometry = new THREE.BoxGeometry(1, 1, 1)
           geometry = toStandardGeometry modelObject
-          material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+          material = new THREE.MeshLambertMaterial({ color: 0xffffff, side: 2 })
           mesh = new THREE.Mesh(geometry, material)
           mesh.geometry.computeBoundingSphere()
           mesh.geometry.computeFaceNormals()
           mesh.geometry.computeVertexNormals()
           parent.add mesh
+
+          light = new THREE.PointLight( 0xffffff, 1, 100)
+          light.position.set( 2, 3, 4)
+          parent.add light
 
           resolve { geometry, model }
 
