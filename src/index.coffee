@@ -2,6 +2,7 @@ THREE = require 'three'
 $ = require 'jquery'
 OrbitControls = require('three-orbit-controls')(THREE)
 require('jquery-ui')
+HoleDetection = require './holeDetection'
 
 view3d = $( '#3d-view' )
 view3d.height '100%'
@@ -34,46 +35,10 @@ clearScene = ->
 btnHolify = ->
   clearScene()
 
-  for shape in myObject
-    maximumIndex = null
-
-    for sequence, sequenceIndex in shape
-      sequence.area += vertex.x *
-        sequence.vertices[ ( i + 1 ) %% sequence.vertices.length ].y -
-        sequence.vertices[ ( i + 1 ) %% sequence.vertices.length ].x *
-        vertex.y for vertex, i in sequence.vertices
-      sequence.area *= 0.5
-      maximumIndex = sequenceIndex if not shape[maximumIndex]? or
-        shape[maximumIndex]?.area < sequence.area
-      sequence.hole = true
-
-    shape[ maximumIndex ]?.hole = false
-
-
-  for shape, shapeInd in myObject
-    console.log "shape #{shapeInd}"
-    for sequence, sequenceInd in shape
-      console.log "sequence #{sequenceInd}"
-      console.log "area = #{sequence.area}"
-      console.log "hole = #{sequence.hole}"
-
-
-  for shape in myObject
-
-    for sequence in shape
-      geometry = new THREE.Geometry()
-
-      for vertex, vertexInd in sequence.vertices
-        geometry.vertices.push( vertex )
-
-        if vertexInd >= 2
-          face = new THREE.Face3( 0, vertexInd - 1, vertexInd )
-          geometry.faces.push( face )
-
-      material = new THREE.MeshBasicMaterial(
-        color: if sequence.hole then 0xff0000 else 0x00ff00 )
-      mesh = new THREE.Mesh( geometry, material )
-      sceneGraph.add( mesh )
+  detector = new HoleDetection()
+  detector.detectHoles myObject
+  drawable = detector.getDrawable()
+  sceneGraph.add( drawable )
 
 
 drawLines = ( object ) ->
@@ -184,6 +149,58 @@ btnTest3 = ( event ) ->
   drawLines( myObject )
 
 
+btnTest4 = ( event ) ->
+  event.preventDefault()
+
+  edgeSequence1 =
+    vertices: [ new THREE.Vector3( -2, 0, -2 )
+      new THREE.Vector3(  2, 0, -2 )
+      new THREE.Vector3(  0, 0, 2 )
+    ]
+    area: null
+    hole: null
+
+  edgeSequence2 =
+    vertices: [ new THREE.Vector3( -1, 0, -1 )
+      new THREE.Vector3(  1, 0, -1 )
+      new THREE.Vector3(  0, 0, 1 )
+    ]
+    area: null
+    hole: null
+
+  shape1 = [ edgeSequence1, edgeSequence2 ]
+
+  myObject = [ shape1 ]
+
+  drawLines( myObject )
+
+
+btnTest5 = ( event ) ->
+  event.preventDefault()
+
+  edgeSequence1 =
+    vertices: [ new THREE.Vector3( 0, -2, -2 )
+      new THREE.Vector3(  0, 2, -2 )
+      new THREE.Vector3(  0, 0, 2 )
+    ]
+    area: null
+    hole: null
+
+  edgeSequence2 =
+    vertices: [ new THREE.Vector3( 0, -1, -1 )
+      new THREE.Vector3(  0, 1, -1 )
+      new THREE.Vector3(  0, 0, 1 )
+    ]
+    area: null
+    hole: null
+
+  shape1 = [ edgeSequence1, edgeSequence2 ]
+
+  myObject = [ shape1 ]
+
+  drawLines( myObject )
+
+
 render = ->
   requestAnimationFrame( render )
   renderer.render(scene, camera)
@@ -213,6 +230,8 @@ $(->
   $('#btnTest1').button().click( btnTest1 )
   $('#btnTest2').button().click( btnTest2 )
   $('#btnTest3').button().click( btnTest3 )
+  $('#btnTest4').button().click( btnTest4 )
+  $('#btnTest5').button().click( btnTest5 )
   $('#btnHolify').button().click( btnHolify )
 
   controls = new OrbitControls( camera, renderer.domElement )
