@@ -103,7 +103,7 @@ $(->
           model = obj.model
           loader.zoomTo geo.boundingSphere, camera, scene
           coplanarFaces = new CoplanarFaces()
-          coplanarFaces.setDebug true
+          #coplanarFaces.setDebug true
           coplanarFaces.setThreshold 0.001
           coplanarFaces.findCoplanarFaces model
           coplanarFaces.setupDrawable()

@@ -8,11 +8,6 @@ class CoplanarFaces
     @threshold = 0.00001
     @debug = false
 
-  # model: null
-  # planarModels: null
-  # faces: null
-  # faceUsed: null
-
   isCoplanar: (face1, face2) ->
     normal1 = new THREE.Vector3(face1.normal.x, face1.normal.y, face1.normal.z)
     normal2 = new THREE.Vector3(face2.normal.x, face2.normal.y, face2.normal.z)
