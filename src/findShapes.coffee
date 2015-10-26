@@ -3,6 +3,8 @@ $ = require 'jquery'
 require 'meshlib'
 
 class ShapesFinder
+  constructor: ->
+    @shapes = []
 
   sameVec: (vec1, vec2) ->
     vec1.x is vec2.x and vec1.y is vec2.y and vec1.z is vec2.z
@@ -81,6 +83,7 @@ class ShapesFinder
     faces = model.model.getFaces()
     shape = @findEdgeLoops faces
     shapes.push shape
+    @shapes = shapes
     return shapes
 
   findShapesFromFaceSets: ( faceSets ) ->
@@ -89,13 +92,12 @@ class ShapesFinder
     for faceSet in faceSets
       shape = @findEdgeLoops faceSet
       shapes.push shape
+    @shapes = shapes
     return shapes
 
-  getDrawable: (model) ->
+  getDrawable: ->
     drawable = new THREE.Object3D()
-    shapes = @findShapesFromModel model
-    edgeLoops = shapes[0]
-    for edgeLoop, i in edgeLoops
+    for shape in @shapes
       switch (i % 6)
         when 0 then lineColor = 0xff0000 #red
         when 1 then lineColor = 0x00ff00 #green
@@ -103,12 +105,13 @@ class ShapesFinder
         when 3 then lineColor = 0xffff00 #yellow
         when 4 then lineColor = 0xff00ff #magenta
         when 5 then lineColor = 0x00ffff #cyan
-      material = new THREE.LineBasicMaterial({ color: lineColor })
-      geometry = new THREE.Geometry()
-      for vertex in edgeLoop
-        geometry.vertices.push vertex
-      obj = new THREE.Line( geometry, material )
-      drawable.add obj
+      for edgeLoop, i in shape
+        material = new THREE.LineBasicMaterial({ color: lineColor })
+        geometry = new THREE.Geometry()
+        for vertex in edgeLoop
+          geometry.vertices.push vertex
+        obj = new THREE.Line( geometry, material )
+        drawable.add obj
     return drawable
 
 
