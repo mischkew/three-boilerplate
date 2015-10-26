@@ -96,7 +96,7 @@ class ShapesFinder
 
   getDrawable: ->
     drawable = new THREE.Object3D()
-    for shape in @shapes
+    for shape, i in @shapes
       switch (i % 6)
         when 0 then lineColor = 0xff0000 #red
         when 1 then lineColor = 0x00ff00 #green
@@ -104,7 +104,7 @@ class ShapesFinder
         when 3 then lineColor = 0xffff00 #yellow
         when 4 then lineColor = 0xff00ff #magenta
         when 5 then lineColor = 0x00ffff #cyan
-      for edgeLoop, i in shape
+      for edgeLoop in shape
         material = new THREE.LineBasicMaterial({ color: lineColor })
         geometry = new THREE.Geometry()
         for vertex in edgeLoop

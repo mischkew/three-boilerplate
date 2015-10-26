@@ -112,9 +112,15 @@ $(->
           coplanarFaces = new CoplanarFaces()
           #coplanarFaces.setDebug true
           coplanarFaces.setThreshold 0.001
-          coplanarFaces.findCoplanarFaces model
+          faceSets = coplanarFaces.findCoplanarFaces model
+          shapesFinder = new ShapesFinder()
+          shapesFinder.findShapesFromFaceSets faceSets
+          #shapesFinder.findShapesFromModel model
+          #drawCoplanarMeshes coplanarFaces.getDrawable()
+          clearScene()
           coplanarFaces.setupDrawable()
-          drawCoplanarMeshes coplanarFaces.getDrawable()
+          root.add coplanarFaces.getDrawable()
+          root.add shapesFinder.getDrawable()
           console.log 'END'
       stopEvent event
     .on 'dragenter', stopEvent
