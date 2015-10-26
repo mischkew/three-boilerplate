@@ -14,7 +14,7 @@ meshlib = require 'meshlib'
 scene = new THREE.Scene()
 
 # renderer
-renderer = new THREE.WebGLRenderer()
+renderer = new THREE.WebGLRenderer({ antialias: true })
 renderer.setSize( window.innerWidth, window.innerHeight )
 
 # camera
@@ -119,7 +119,7 @@ $(->
           #drawCoplanarMeshes coplanarFaces.getDrawable()
           clearScene()
           coplanarFaces.setupDrawable()
-          root.add coplanarFaces.getDrawable()
+          #root.add coplanarFaces.getDrawable()
           root.add shapesFinder.getDrawable()
           console.log 'END'
       stopEvent event

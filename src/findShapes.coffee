@@ -105,10 +105,14 @@ class ShapesFinder
         when 4 then lineColor = 0xff00ff #magenta
         when 5 then lineColor = 0x00ffff #cyan
       for edgeLoop in shape
-        material = new THREE.LineBasicMaterial({ color: lineColor })
+        material =
+          new THREE.LineDashedMaterial(
+            { color: lineColor, dashSize: 0.1, gapSize: 0.3 })
         geometry = new THREE.Geometry()
         for vertex in edgeLoop
-          geometry.vertices.push vertex
+          v = new THREE.Vector3(vertex.x, vertex.y, vertex.z)
+          geometry.vertices.push v
+        geometry.computeLineDistances()
         obj = new THREE.Line( geometry, material )
         drawable.add obj
     return drawable
