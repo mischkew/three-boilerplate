@@ -88,7 +88,6 @@ class ShapesFinder
 
   findShapesFromFaceSets: ( faceSets ) ->
     shapes = []
-    faces = model.model.getFaces()
     for faceSet in faceSets
       shape = @findEdgeLoops faceSet
       shapes.push shape
