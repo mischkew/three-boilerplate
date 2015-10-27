@@ -110,17 +110,15 @@ $(->
           model = obj.model
           loader.zoomTo geo.boundingSphere, camera, scene
           coplanarFaces = new CoplanarFaces()
-          #coplanarFaces.setDebug true
+          coplanarFaces.setDebug true
           coplanarFaces.setThreshold 0.001
           faceSets = coplanarFaces.findCoplanarFaces model
-          shapesFinder = new ShapesFinder()
-          shapesFinder.findShapesFromFaceSets faceSets
-          #shapesFinder.findShapesFromModel model
-          #drawCoplanarMeshes coplanarFaces.getDrawable()
+          #shapesFinder = new ShapesFinder()
+          #shapesFinder.findShapesFromFaceSets faceSets
           clearScene()
           coplanarFaces.setupDrawable()
-          #root.add coplanarFaces.getDrawable()
-          root.add shapesFinder.getDrawable()
+          root.add coplanarFaces.getDrawable()
+          #root.add shapesFinder.getDrawable()
           console.log 'END'
       stopEvent event
     .on 'dragenter', stopEvent

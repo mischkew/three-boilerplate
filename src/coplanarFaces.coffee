@@ -1,5 +1,6 @@
 THREE = require 'three'
 meshlib = require 'meshlib'
+Util = require './utilityFunctions'
 
 class CoplanarFaces
 
@@ -13,39 +14,14 @@ class CoplanarFaces
     normal2 = new THREE.Vector3(face2.normal.x, face2.normal.y, face2.normal.z)
     return normal1.angleTo(normal2) <= @threshold
 
-  edgeAdjacent: (face1, face2, index1, index2) ->
-    return (@isSameVec face1.vertices[index1], face2.vertices[index2]) and
-      (@isSameVec face1.vertices[(index1 + 1) % 3],
-      face2.vertices[(index2 + 1) % 3])
-
-  edgeReverseAdjacent: (face1, face2, index1, index2) ->
-    return (@isSameVec face1.vertices[index1],
-      face2.vertices[(index2 + 1) % 3]) and
-      (@isSameVec face1.vertices[(index1 + 1) % 3], face2.vertices[index2])
-
   isAdjacent: (face1, face2) ->
     for index1 in [0..2]
       for index2 in [0..2]
-        if @edgeAdjacent(face1, face2, index1, index2) or
-        @edgeReverseAdjacent(face1, face2, index1, index2)
+        edge1 = [face1.vertices[index1], face1.vertices[(index1 + 1) % 3]]
+        edge2 = [face2.vertices[index2], face2.vertices[(index2 + 1) % 3]]
+        if Util.isSameEdge edge1, edge2
           return true
     return false
-
-  isSameVec: (vector1, vector2) ->
-    if vector1.x is vector2.x and
-        vector1.y is vector2.y and
-        vector1.z is vector2.z
-      return true
-    else
-      return false
-
-  isSameFace: (face1, face2) ->
-    for i in [0..2]
-      if not @isSameVec(face1.vertices[i], face2.vertices[i])
-        return false
-    if not @isSameVec(face1.normal, face2.normal)
-      return false
-    return true
 
   isAdjacentAndCoplanar: (face1, face2) ->
     return @isAdjacent(face1, face2) and @isCoplanar(face1, face2)
