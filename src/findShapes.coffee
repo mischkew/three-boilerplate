@@ -5,6 +5,7 @@ require 'meshlib'
 class ShapesFinder
   constructor: ->
     @shapes = []
+    @drawable = new THREE.Object3D()
 
   sameVec: (vec1, vec2) ->
     vec1.x is vec2.x and vec1.y is vec2.y and vec1.z is vec2.z
@@ -65,13 +66,14 @@ class ShapesFinder
     return { edges, merged }
 
   getEdgeLoops: (edges) ->
+    if edges.length is 0
+      return []
     merged = yes
     while merged
       mergeEdges = @mergeEdges edges
       edges = mergeEdges.edges
       merged = mergeEdges.merged
     return edges
-
 
   findEdgeLoops: (faces) ->
     edges = @getEdges faces
@@ -84,6 +86,7 @@ class ShapesFinder
     shape = @findEdgeLoops faces
     shapes.push shape
     @shapes = shapes
+    @setupDrawable()
     return shapes
 
   findShapesFromFaceSets: ( faceSets ) ->
@@ -92,10 +95,12 @@ class ShapesFinder
       shape = @findEdgeLoops faceSet
       shapes.push shape
     @shapes = shapes
+    @setupDrawable()
     return shapes
 
-  getDrawable: ->
-    drawable = new THREE.Object3D()
+  setupDrawable: ->
+    while (@drawable.children.length > 0)
+      @drawable.remove @drawable.children[0]
     for shape, i in @shapes
       switch (i % 6)
         when 0 then lineColor = 0xff0000 #red
@@ -114,8 +119,10 @@ class ShapesFinder
           geometry.vertices.push v
         geometry.computeLineDistances()
         obj = new THREE.Line( geometry, material )
-        drawable.add obj
-    return drawable
+        @drawable.add obj
+
+  getDrawable: ->
+    return @drawable
 
 
 module.exports = ShapesFinder
