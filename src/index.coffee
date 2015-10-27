@@ -26,13 +26,14 @@ camera = new THREE.PerspectiveCamera(
 )
 camera.position.z = 5
 
+boundingSphere = { radius: 0.866025, center: new THREE.Vector3(0, 0, 0) }
+
 # root object
 root = new THREE.Object3D()
 scene.add(root)
 
 # configure model loading
 _loadModel = loader.loadModel root, camera, scene
-
 
 # some scene objects
 geometry = new THREE.BoxGeometry(1, 1, 1)
@@ -43,46 +44,30 @@ cube2Translation = 0.05
 
 root.add( cube2 )
 
+loader.zoomTo boundingSphere, camera, scene
+
 
 ### HELPERS ###
 
 render = ->
   requestAnimationFrame(render)
 
-  # if (root.children.length > 0)
-  #   root.children[0].rotation.x += 0.005
-  #   root.children[0].rotation.y += 0.005
-
   for child in root.children
     child.rotation.x += 0.02
     child.rotation.y += 0.01
 
-  cube2.rotation.x += 0.05
-  cube2.rotation.y += 0.05
-
-  if cube2.position.x > 2.0 or cube2.position.x < -2.0 or
-  cube2.position.y > 2.0 or cube2.position.y < -2.0
-    cube2Translation *= -1.0
-
-  cube2.translateX(cube2Translation)
   renderer.render(scene, camera)
-
-drawCoplanarMeshes = (drawable) ->
-  while (root.children.length > 0)
-    root.remove root.children[0]
-
-  root.add drawable
 
 setupRenderSize = (view3d) ->
   camera = new THREE.PerspectiveCamera(
-    75
+    50
     view3d.width() / view3d.height()
     0.1
     1000
   )
   camera.position.z = 5
   renderer.setSize( view3d.width(), view3d.height() )
-
+  loader.zoomTo boundingSphere, camera, scene
 
 stopEvent = (event) ->
   event.preventDefault()
@@ -91,7 +76,6 @@ stopEvent = (event) ->
 clearScene = ->
   while (root.children.length > 0)
     root.remove root.children[0]
-
 
 ### INITIALIZATION ###
 
@@ -106,19 +90,19 @@ $(->
     .on 'drop', (event) ->
       _loadModel event.originalEvent
         .then (obj) ->
-          geo = obj.geometry
+          boundingSphere = obj.geometry.boundingSphere
           model = obj.model
-          loader.zoomTo geo.boundingSphere, camera, scene
+          setupRenderSize view3d
           coplanarFaces = new CoplanarFaces()
-          coplanarFaces.setDebug true
+          #coplanarFaces.setDebug true
           coplanarFaces.setThreshold 0.001
           faceSets = coplanarFaces.findCoplanarFaces model
-          #shapesFinder = new ShapesFinder()
-          #shapesFinder.findShapesFromFaceSets faceSets
+          shapesFinder = new ShapesFinder()
+          shapesFinder.findShapesFromFaceSets faceSets
           clearScene()
           coplanarFaces.setupDrawable()
           root.add coplanarFaces.getDrawable()
-          #root.add shapesFinder.getDrawable()
+          root.add shapesFinder.getDrawable()
           console.log 'END'
       stopEvent event
     .on 'dragenter', stopEvent
