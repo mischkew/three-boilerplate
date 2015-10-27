@@ -1,22 +1,12 @@
 THREE = require 'three'
 $ = require 'jquery'
 require 'meshlib'
+Util = require './utilityFunctions'
 
 class ShapesFinder
   constructor: ->
     @shapes = []
     @drawable = new THREE.Object3D()
-
-  sameVec: (vec1, vec2) ->
-    vec1.x is vec2.x and vec1.y is vec2.y and vec1.z is vec2.z
-
-  sameEdge: (edge1, edge2) ->
-    (@sameVec(edge1[0], edge2[0]) and @sameVec(edge1[1], edge2[1])) or
-      (@sameVec(edge1[0], edge2[1]) and @sameVec(edge1[1], edge2[0]))
-
-  haveSameVert: (edge1, edge2) ->
-    (@sameVec(edge1[0], edge2[0]) or @sameVec(edge1[1], edge2[1])) or
-    (@sameVec(edge1[0], edge2[1]) or @sameVec(edge1[1], edge2[0]))
 
   nextVertexIndex: ( inIndex ) ->
     outIndex = inIndex + 1
@@ -33,7 +23,7 @@ class ShapesFinder
         edge = [face.vertices[i], face.vertices[j]]
         found = no
         for existingEdge, i in edges.slice()
-          if @sameEdge edge, existingEdge
+          if Util.isSameEdge edge, existingEdge
             found = yes
             edges.splice(i, 1)
         if not found
@@ -43,11 +33,11 @@ class ShapesFinder
   mergeTwoEdges: (edge1, edge2) ->
     added = no
     newEdge = edge1
-    if @sameVec( edge2[edge2.length - 1], edge1[0] )
+    if Util.isSameVec( edge2[edge2.length - 1], edge1[0] )
       newEdge = edge2
       newEdge = newEdge.concat(edge1[1..])
       added = true
-    if not added and @sameVec( edge1[edge1.length - 1], edge2[0] )
+    if not added and Util.isSameVec( edge1[edge1.length - 1], edge2[0] )
       newEdge = newEdge.concat(edge2[1..])
       added = true
     return { newEdge, added }
