@@ -66,6 +66,8 @@ class ShapesFinder
     return { edges, merged }
 
   getEdgeLoops: (edges) ->
+    if edges.length is 0
+      return []
     merged = yes
     while merged
       mergeEdges = @mergeEdges edges
