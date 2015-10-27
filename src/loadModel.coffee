@@ -101,7 +101,7 @@ module.exports.zoomTo = (boundingSphere, camera, scene) ->
 
   rv = camera.position.clone()
   rv = rv.normalize().multiplyScalar(distanceToObject)
-  zoomAdjustmentFactor = 2.5
+  zoomAdjustmentFactor = 0.8
   rv = rv.multiplyScalar(zoomAdjustmentFactor)
 
   #apply scene transforms (e.g. rotation to make y the vector facing upwards)
