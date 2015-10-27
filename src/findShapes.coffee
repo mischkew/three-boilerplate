@@ -104,7 +104,7 @@ class ShapesFinder
 
 # coffeelint: disable=cyclomatic_complexity
   getColorFromIndex: ( index ) ->
-    switch (i % 6)
+    switch (index % 6)
       when 0 then lineColor = 0xff0000 #red
       when 1 then lineColor = 0x00ff00 #green
       when 2 then lineColor = 0x0000ff #blue
