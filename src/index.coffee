@@ -6,6 +6,7 @@ loader = require './loadModel'
 ShapesFinder = require './findShapes'
 CoplanarFaces = require './coplanarFaces'
 meshlib = require 'meshlib'
+Util = require './utilityFunctions'
 
 
 ### SCENE SETUP ###
@@ -89,15 +90,20 @@ $(->
     .on 'drop', (event) ->
       _loadModel event.originalEvent
         .then (obj) ->
+          model = Util.centerModel(obj.model)
+
           boundingSphere = obj.geometry.boundingSphere
-          model = obj.model
+          boundingSphere.center = new THREE.Vector3(0, 0, 0)
           setupRenderSize view3d
+
           coplanarFaces = new CoplanarFaces()
           #coplanarFaces.setDebug true
           coplanarFaces.setThreshold 0.001
           faceSets = coplanarFaces.findCoplanarFaces model
+
           shapesFinder = new ShapesFinder()
           shapesFinder.findShapesFromFaceSets faceSets
+
           clearScene()
           coplanarFaces.setupDrawable()
           root.add coplanarFaces.getDrawable()

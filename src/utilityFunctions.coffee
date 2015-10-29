@@ -14,4 +14,12 @@ class Util
     @isSameVec(edge1[0], edge2[1]) and @isSameVec(edge1[1], edge2[0])
 
 
+  @centerModel: (model) ->
+    box = model.model.getBoundingBox { recalculate: true, source: 'faces' }
+    model.model.translate({
+      x: -( box.min.x + (box.max.x - box.min.x) / 2 )
+      y: -( box.min.y + (box.max.y - box.min.y) / 2 )
+      z: -( box.min.z + (box.max.z - box.min.z) / 2 ) })
+    return model
+
 module.exports = Util
