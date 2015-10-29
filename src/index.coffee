@@ -2,6 +2,7 @@ THREE = require 'three'
 $ = require 'jquery'
 #OrbitControls = require('three-orbit-controls')(THREE)
 require('jquery-ui')
+numeric = require './numeric-1.2.6.js'
 # see mdn Math for math functions
 
 view3d = $( '#3d-view' )
@@ -31,17 +32,10 @@ clearScene = ->
   sceneGraph.children = []
 
 
-calcNormalizedNormal = (vertex1, vertex2, vertex3) ->
-  vector1 = new THREE.Vector3()
-  vector2 = new THREE.Vector3()
-  vector1.subVectors(vertex2, vertex1)
-  vector2.subVectors(vertex3, vertex1)
-
-  crossProduct = new THREE.Vector3()
-  crossProduct.crossVectors(vector1, vector2)
-  normal = new THREE.Vector3()
-  normal = crossProduct.divideScalar(crossProduct.length())
-  return normal
+createPlane = (vertex1, vertex2, vertex3) ->
+  plane = new THREE.Plane()
+  plane.setFromCoplanarPoints(vertex1, vertex2, vertex3)
+  return plane
 
 
 btnFindIntersection = (event) ->
@@ -49,25 +43,53 @@ btnFindIntersection = (event) ->
 
   console.log 'calculations started'
 
+  for plate in myObject
+    for edgeLoop in plate
+      plane = createPlane(
+                          edgeLoop.vertices[0]
+                          edgeLoop.vertices[1]
+                          edgeLoop.vertices[2])
+      edgeLoop.normal = plane.normal
+      edgeLoop.constant = plane.constant
+
   if myObject? and (myObject.length >= 2)
     console.log 'intersections possible'
     for plate1, index in myObject
       if index + 1 < myObject.length
         for plate2 in myObject[index + 1...myObject.length]
           alert "testing #{plate1[0].name} with #{plate2[0].name}"
-          normal = calcNormalizedNormal(
-            plate1[0].vertices[0],
-            plate1[0].vertices[1],
-            plate1[0].vertices[2] )
-          console.log "Normal of first plate:
-            (#{normal.x},#{normal.y},#{normal.z})"
-          normal2 = calcNormalizedNormal(
-            plate2[0].vertices[0],
-            plate2[0].vertices[1],
-            plate2[0].vertices[2] )
-          console.log "Normal of second plate:
-            (#{normal2.x},#{normal2.y},#{normal2.z})"
-
+          dir = new THREE.Vector3()
+          dir.crossVectors(plate1[0].normal, plate2[0].normal)
+          console.log "direction of possible intersection vector:
+                 (#{dir.x}, #{dir.y}, #{dir.z})"
+          console.log "(
+              #{plate1[0].normal.x},
+              #{plate1[0].normal.y},
+              #{plate1[0].normal.z}) * x = -#{plate1[0].constant}  "
+          console.log "(
+              #{plate2[0].normal.x},
+              #{plate2[0].normal.y},
+              #{plate2[0].normal.z}) * x = -#{plate2[0].constant}  "
+          if dir.x isnt 0
+            console.log numeric.solve([[plate1[0].normal.y, plate1[0].normal.z],
+                  [plate2[0].normal.y, plate2[0].normal.z],
+                  -[plate1[0].constant]])
+          else if dir.y isnt 0
+            console.log 'trying to solve system with y != 0'
+            console.log numeric.round(numeric.solve([[1, 2], [3, 4]], [17, 39]))
+            console.log "solve [[#{plate1[0].normal.x}, #{plate1[0].normal.z}],
+                   [#{plate2[0].normal.x}, #{plate2[0].normal.z}]],
+                   [-#{plate1[0].constant}, -#{plate2[0].constant}]"
+            console.log numeric.solve([[plate1[0].normal.x, plate1[0].normal.z],
+                   [plate2[0].normal.x, plate2[0].normal.z]],
+                   [-plate1[0].constant, -plate2[0].constant])
+            #console.log numeric.round(numeric.solve([[0, 1], [1, 0]], [0, 3]))
+          else if dir.z isnt 0
+            console.log numeric.solve([[plate1[0].normal.x, plate1[0].normal.y],
+                  [plate2[0].normal.y, plate2[0].normal.z],
+                  -[plate1[0].constant]])
+          else
+            console.log "can't solve the linear system.."
   else
     console.log 'not enough plates for intersections'
 
@@ -102,20 +124,26 @@ btnScene1 = ( event ) ->
     name: '1'
     thickness: 2
     hole: false
-    normal: null
+    normal: new THREE.Vector3()
+    constant: null
     area: null # will be given but unimportant to me
 
   edgeLoop2 =
     vertices: [
-      new THREE.Vector3(  3,  3, 0 )
-      new THREE.Vector3(  3, -3, 0 )
-      new THREE.Vector3(  4, -3, 0 )
-      new THREE.Vector3(  4,  3, 0 )
+      # new THREE.Vector3(  3,  3, 0 )
+      # new THREE.Vector3(  3, -3, 0 )
+      # new THREE.Vector3(  4, -3, 0 )
+      # new THREE.Vector3(  4,  3, 0 )
+      new THREE.Vector3(  3,  3,  0 )
+      new THREE.Vector3(  3, -3,  0 )
+      new THREE.Vector3(  3, -3, -1 )
+      new THREE.Vector3(  3,  3, -1 )
     ]
     name: '2'
     thickness: 2
     hole: false
-    normal: null
+    normal: new THREE.Vector3()
+    constant: null
     area: null # will be given but unimportant to me
 
   plate1 = [ edgeLoop1 ]
@@ -155,7 +183,7 @@ $(->
   $('#btnScene1')
     .button().click( btnScene1 ).text('Click for Scene')
   $('#btnFindIntersection')
-    .button().click(btnFindIntersection).text('Find inter sections')
+    .button().click(btnFindIntersection).text('Find intersections')
 
 
   #controls = new OrbitControls( camera, renderer.domElement )
