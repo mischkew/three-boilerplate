@@ -2,6 +2,7 @@ THREE = require 'three'
 $ = require 'jquery'
 #OrbitControls = require('three-orbit-controls')(THREE)
 require('jquery-ui')
+# see mdn Math for math functions
 
 view3d = $( '#3d-view' )
 view3d.height '100%'
@@ -36,11 +37,47 @@ btnFindIntersection = (event) ->
 
   console.log 'calculations started'
 
-  if myObject? and (myObject.length is 2)
+  if myObject? and (myObject.length >= 2)
     console.log 'intersections possible'
-    for plate1 in myObject
-      for plate2 in myObject
-            alert "testing #{plate1[0].name} with #{plate2[0].name}"
+    for plate1, index in myObject
+      if index + 1 < myObject.length
+        index2 = index + 1
+        for plate2 in myObject[index + 1...myObject.length]
+          alert "testing #{plate1[0].name} with #{plate2[0].name}"
+          index2 = index2 + 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #
+    # for plate1, index1 in myObject
+    #   console.log "index is #{index1} length is #{myObject.length}"
+    #   if index1 < myObject.length
+    #     index2 = index1
+    #     for plate2 in [index1...myObject.length]
+    #
+    #        if plate1 isnt plate2
+    #          alert "testing #{plate1[index1].name} current index is #{index2}"
+    #        index2 = index2+1
+
+
+
+
+
   else
     console.log 'not enough plates for intersections'
 
@@ -51,12 +88,12 @@ drawLines = ( object ) ->
 
   material = new THREE.LineBasicMaterial( color: 0xAAAAAA )
   for plate in object
-    for sequence in plate
+    for edgeLoop in plate
       geometry = new THREE.Geometry()
-      for vertex in sequence.vertices
+      for vertex in edgeLoop.vertices
         geometry.vertices.push( vertex )
 
-      geometry.vertices.push( sequence.vertices[0] )
+      geometry.vertices.push( edgeLoop.vertices[0] )
 
       line = new THREE.Line( geometry, material )
       sceneGraph.add( line )
@@ -65,7 +102,7 @@ drawLines = ( object ) ->
 btnScene1 = ( event ) ->
   event.preventDefault()
 
-  edgeSequence1 =
+  edgeLoop1 =
     vertices: [
       new THREE.Vector3( -3, -3, 0 )
       new THREE.Vector3(  3, -3, 0 )
@@ -75,9 +112,9 @@ btnScene1 = ( event ) ->
     name: '1'
     thickness: 2
     hole: false
-    area: true
+    # area: null
 
-  edgeSequence2 =
+  edgeLoop2 =
     vertices: [
       new THREE.Vector3(  3,  3, 0 )
       new THREE.Vector3(  3, -3, 0 )
@@ -87,10 +124,10 @@ btnScene1 = ( event ) ->
     name: '2'
     thickness: 2
     hole: false
-    area: true
+    # area: null
 
-  plate1 = [ edgeSequence1 ]
-  plate2 = [ edgeSequence2 ]
+  plate1 = [ edgeLoop1 ]
+  plate2 = [ edgeLoop2 ]
 
   myObject = [ plate1, plate2 ]
 
