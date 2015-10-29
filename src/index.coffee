@@ -49,14 +49,11 @@ drawLines = ( object ) ->
 
   material = new THREE.LineBasicMaterial( color: 0xAAAAAA )
   for shape in object
-    # for sequence in shape
     for edgeLoop in shape.getEdgeLoops()
       geometry = new THREE.Geometry()
-      # for vertex in sequence.vertices
       for vertex in edgeLoop.vertices
         geometry.vertices.push( vertex )
 
-      # geometry.vertices.push( sequence.vertices[0] )
       geometry.vertices.push( edgeLoop.vertices[0] )
 
       line = new THREE.Line( geometry, material )
