@@ -1,35 +1,29 @@
 THREE = require 'three'
 $ = require 'jquery'
 require 'meshlib'
+Util = require './utilityFunctions'
 
 class ShapesFinder
   constructor: ->
     @shapes = []
     @drawable = new THREE.Object3D()
 
-  sameVec: (vec1, vec2) ->
-    vec1.x is vec2.x and vec1.y is vec2.y and vec1.z is vec2.z
-
-  sameEdge: (edge1, edge2) ->
-    (@sameVec(edge1[0], edge2[0]) and @sameVec(edge1[1], edge2[1])) or
-      (@sameVec(edge1[0], edge2[1]) and @sameVec(edge1[1], edge2[0]))
-
-  haveSameVert: (edge1, edge2) ->
-    (@sameVec(edge1[0], edge2[0]) or @sameVec(edge1[1], edge2[1])) or
-    (@sameVec(edge1[0], edge2[1]) or @sameVec(edge1[1], edge2[0]))
+  nextVertexIndex: ( inIndex ) ->
+    outIndex = inIndex + 1
+    if outIndex > 2
+      outIndex = 0
+    return outIndex
 
   getEdges: (faces) ->
     edges = []
     for face in faces
       indexedFace = []
       for i in [0..2]
-        j = i + 1
-        if j > 2
-          j = 0
+        j = @nextVertexIndex i
         edge = [face.vertices[i], face.vertices[j]]
         found = no
         for existingEdge, i in edges.slice()
-          if @sameEdge edge, existingEdge
+          if Util.isSameEdge edge, existingEdge
             found = yes
             edges.splice(i, 1)
         if not found
@@ -39,11 +33,11 @@ class ShapesFinder
   mergeTwoEdges: (edge1, edge2) ->
     added = no
     newEdge = edge1
-    if @sameVec( edge2[edge2.length - 1], edge1[0] )
+    if Util.isSameVec( edge2[edge2.length - 1], edge1[0] )
       newEdge = edge2
       newEdge = newEdge.concat(edge1[1..])
       added = true
-    if not added and @sameVec( edge1[edge1.length - 1], edge2[0] )
+    if not added and Util.isSameVec( edge1[edge1.length - 1], edge2[0] )
       newEdge = newEdge.concat(edge2[1..])
       added = true
     return { newEdge, added }
@@ -98,17 +92,23 @@ class ShapesFinder
     @setupDrawable()
     return shapes
 
+# coffeelint: disable=cyclomatic_complexity
+  getColorFromIndex: ( index ) ->
+    switch (index % 6)
+      when 0 then lineColor = 0xff0000 #red
+      when 1 then lineColor = 0x00ff00 #green
+      when 2 then lineColor = 0x0000ff #blue
+      when 3 then lineColor = 0xffff00 #yellow
+      when 4 then lineColor = 0xff00ff #magenta
+      when 5 then lineColor = 0x00ffff #cyan
+    return lineColor
+# coffeelint: enable=cyclomatic_complexity
+
   setupDrawable: ->
     while (@drawable.children.length > 0)
       @drawable.remove @drawable.children[0]
     for shape, i in @shapes
-      switch (i % 6)
-        when 0 then lineColor = 0xff0000 #red
-        when 1 then lineColor = 0x00ff00 #green
-        when 2 then lineColor = 0x0000ff #blue
-        when 3 then lineColor = 0xffff00 #yellow
-        when 4 then lineColor = 0xff00ff #magenta
-        when 5 then lineColor = 0x00ffff #cyan
+      lineColor = @getColorFromIndex i
       for edgeLoop in shape
         material =
           new THREE.LineDashedMaterial(

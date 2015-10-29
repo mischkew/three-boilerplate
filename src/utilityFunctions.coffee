@@ -13,9 +13,6 @@ class Util
     @isSameVec(edge1[0], edge2[0]) and @isSameVec(edge1[1], edge2[1]) or
     @isSameVec(edge1[0], edge2[1]) and @isSameVec(edge1[1], edge2[0])
 
-  @haveSameVert: (edge1, edge2) ->
-    @isSameVec(edge1[0], edge2[0]) or @isSameVec(edge1[1], edge2[1]) or
-    @isSameVec(edge1[0], edge2[1]) or @isSameVec(edge1[1], edge2[0])
 
   @centerModel: (model) ->
     box = model.model.getBoundingBox { recalculate: true, source: 'faces' }
