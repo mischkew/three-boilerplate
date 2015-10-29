@@ -31,6 +31,7 @@ module.exports = (grunt) ->
             debug: true
             extensions: [
               '.js',
+              '.jsx',
               '.coffee'
             ]
 
@@ -61,6 +62,7 @@ module.exports = (grunt) ->
       development:
         options:
           livereload: true
+          spawn: false
         files: [
           'src/**/*'
         ]
