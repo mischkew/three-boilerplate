@@ -2,7 +2,10 @@ THREE = require 'three'
 $ = require 'jquery'
 OrbitControls = require('three-orbit-controls')(THREE)
 require('jquery-ui')
+Meshlib = require 'meshlib'
 HoleDetection = require './holeDetection'
+EdgeLoop = require './edgeLoop'
+Shape = require './shape'
 
 view3d = $( '#3d-view' )
 view3d.height '100%'
@@ -36,7 +39,7 @@ btnHolify = ->
   clearScene()
 
   detector = new HoleDetection()
-  detector.detectHoles myObject
+  detector.detectHoles( myObject )
   drawable = detector.getDrawable()
   sceneGraph.add( drawable )
 
@@ -46,39 +49,36 @@ drawLines = ( object ) ->
 
   material = new THREE.LineBasicMaterial( color: 0xAAAAAA )
   for shape in object
-    for sequence in shape
+    # for sequence in shape
+    for edgeLoop in shape.getEdgeLoops()
       geometry = new THREE.Geometry()
-      for vertex in sequence.vertices
+      # for vertex in sequence.vertices
+      for vertex in edgeLoop.vertices
         geometry.vertices.push( vertex )
 
-      geometry.vertices.push( sequence.vertices[0] )
+      # geometry.vertices.push( sequence.vertices[0] )
+      geometry.vertices.push( edgeLoop.vertices[0] )
 
       line = new THREE.Line( geometry, material )
       sceneGraph.add( line )
 
 
 btnTest1 = ( event ) ->
-  event.preventDefault()
+  edgeLoop1 = new EdgeLoop( [
+    new THREE.Vector3( -3, -3, 0 )
+    new THREE.Vector3(  3, -3, 0 )
+    new THREE.Vector3(  3,  3, 0 )
+    new THREE.Vector3( -3,  3, 0 )
+  ] )
 
-  edgeSequence1 =
-    vertices: [ new THREE.Vector3( -3, -3, 0 )
-      new THREE.Vector3(  3, -3, 0 )
-      new THREE.Vector3(  3,  3, 0 )
-      new THREE.Vector3( -3,  3, 0 )
-    ]
-    area: null
-    hole: null
+  edgeLoop2 = new EdgeLoop( [
+    new THREE.Vector3( -1, -1, 0 )
+    new THREE.Vector3(  1, -1, 0 )
+    new THREE.Vector3(  1,  1, 0 )
+    new THREE.Vector3( -1,  1, 0 )
+  ] )
 
-  edgeSequence2 =
-    vertices: [ new THREE.Vector3( -1, -1, 0 )
-      new THREE.Vector3(  1, -1, 0 )
-      new THREE.Vector3(  1,  1, 0 )
-      new THREE.Vector3( -1,  1, 0 )
-    ]
-    area: null
-    hole: null
-
-  shape1 = [ edgeSequence1, edgeSequence2 ]
+  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ] )
 
   myObject = [ shape1 ]
 
@@ -86,37 +86,29 @@ btnTest1 = ( event ) ->
 
 
 btnTest2 = ( event ) ->
-  event.preventDefault()
+  edgeLoop1 = new EdgeLoop( [
+    new THREE.Vector3( -3, -3, 0 )
+    new THREE.Vector3(  3, -3, 0 )
+    new THREE.Vector3(  3,  3, 0 )
+    new THREE.Vector3( -3,  3, 0 )
+  ] )
 
-  edgeSequence1 =
-    vertices: [ new THREE.Vector3( -3, -3, 0 )
-      new THREE.Vector3(  3, -3, 0 )
-      new THREE.Vector3(  3,  3, 0 )
-      new THREE.Vector3( -3,  3, 0 )
-    ]
-    area: null
-    hole: null
+  edgeLoop2 = new EdgeLoop( [
+    new THREE.Vector3( -2, -2, 0 )
+    new THREE.Vector3( -1, -2, 0 )
+    new THREE.Vector3( -1, -0.5, 0 )
+    new THREE.Vector3( -2, -0.5, 0 )
+  ] )
 
-  edgeSequence2 =
-    vertices: [ new THREE.Vector3( -2, -2, 0 )
-      new THREE.Vector3( -1, -2, 0 )
-      new THREE.Vector3( -1, -0.5, 0 )
-      new THREE.Vector3( -2, -0.5, 0 )
-    ]
-    area: null
-    hole: null
+  edgeLoop3 = new EdgeLoop( [
+    new THREE.Vector3( 0, 0, 0 )
+    new THREE.Vector3( 2.5, -0.7, 0 )
+    new THREE.Vector3( 2.3, 0, 0 )
+    new THREE.Vector3( 1, 2, 0 )
+    new THREE.Vector3( -1, 1, 0 )
+  ] )
 
-  edgeSequence3 =
-    vertices: [ new THREE.Vector3( 0, 0, 0 )
-      new THREE.Vector3( 2.5, -0.7, 0 )
-      new THREE.Vector3( 2.3, 0, 0 )
-      new THREE.Vector3( 1, 2, 0 )
-      new THREE.Vector3( -1, 1, 0 )
-    ]
-    area: null
-    hole: null
-
-  shape1 = [ edgeSequence1, edgeSequence2, edgeSequence3 ]
+  shape1 = new Shape( [ edgeLoop1, edgeLoop2, edgeLoop3 ] )
 
   myObject = [ shape1 ]
 
@@ -124,25 +116,19 @@ btnTest2 = ( event ) ->
 
 
 btnTest3 = ( event ) ->
-  event.preventDefault()
+  edgeLoop1 = new EdgeLoop( [
+    new THREE.Vector3( -2.7, -2.5, 0.2 )
+    new THREE.Vector3(  6, -2.5, -8.5 )
+    new THREE.Vector3(  -0.5, 0.7, 1.2 )
+  ] )
 
-  edgeSequence1 =
-    vertices: [ new THREE.Vector3( -2.7, -2.5, 0.2 )
-      new THREE.Vector3(  6, -2.5, -8.5 )
-      new THREE.Vector3(  -0.5, 0.7, 1.2 )
-    ]
-    area: null
-    hole: null
+  edgeLoop2 = new EdgeLoop( [
+    new THREE.Vector3( -3, -3, 0 )
+    new THREE.Vector3(  9, -3, -12 )
+    new THREE.Vector3(  -1, 1, 2 )
+   ] )
 
-  edgeSequence2 =
-    vertices: [ new THREE.Vector3( -3, -3, 0 )
-      new THREE.Vector3(  9, -3, -12 )
-      new THREE.Vector3(  -1, 1, 2 )
-    ]
-    area: null
-    hole: null
-
-  shape1 = [ edgeSequence1, edgeSequence2 ]
+  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ] )
 
   myObject = [ shape1 ]
 
@@ -150,25 +136,19 @@ btnTest3 = ( event ) ->
 
 
 btnTest4 = ( event ) ->
-  event.preventDefault()
+  edgeLoop1 = new EdgeLoop( [
+    new THREE.Vector3( -2, 0, -2 )
+    new THREE.Vector3(  2, 0, -2 )
+    new THREE.Vector3(  0, 0, 2 )
+  ] )
 
-  edgeSequence1 =
-    vertices: [ new THREE.Vector3( -2, 0, -2 )
-      new THREE.Vector3(  2, 0, -2 )
-      new THREE.Vector3(  0, 0, 2 )
-    ]
-    area: null
-    hole: null
+  edgeLoop2 = new EdgeLoop( [
+    new THREE.Vector3( -1, 0, -1 )
+    new THREE.Vector3(  1, 0, -1 )
+    new THREE.Vector3(  0, 0, 1 )
+  ] )
 
-  edgeSequence2 =
-    vertices: [ new THREE.Vector3( -1, 0, -1 )
-      new THREE.Vector3(  1, 0, -1 )
-      new THREE.Vector3(  0, 0, 1 )
-    ]
-    area: null
-    hole: null
-
-  shape1 = [ edgeSequence1, edgeSequence2 ]
+  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ] )
 
   myObject = [ shape1 ]
 
@@ -176,25 +156,19 @@ btnTest4 = ( event ) ->
 
 
 btnTest5 = ( event ) ->
-  event.preventDefault()
+  edgeLoop1 = new EdgeLoop( [
+    new THREE.Vector3( 0, -2, -2 )
+    new THREE.Vector3(  0, 2, -2 )
+    new THREE.Vector3(  0, 0, 2 )
+  ] )
 
-  edgeSequence1 =
-    vertices: [ new THREE.Vector3( 0, -2, -2 )
-      new THREE.Vector3(  0, 2, -2 )
-      new THREE.Vector3(  0, 0, 2 )
-    ]
-    area: null
-    hole: null
+  edgeLoop2 = new EdgeLoop( [
+    new THREE.Vector3( 0, -1, -1 )
+    new THREE.Vector3(  0, 1, -1 )
+    new THREE.Vector3(  0, 0, 1 )
+  ] )
 
-  edgeSequence2 =
-    vertices: [ new THREE.Vector3( 0, -1, -1 )
-      new THREE.Vector3(  0, 1, -1 )
-      new THREE.Vector3(  0, 0, 1 )
-    ]
-    area: null
-    hole: null
-
-  shape1 = [ edgeSequence1, edgeSequence2 ]
+  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ] )
 
   myObject = [ shape1 ]
 
