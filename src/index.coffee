@@ -43,24 +43,59 @@ findPointOnBothPlanes = (dir, plate1, plate2) ->
     solution = numeric.round(numeric.solve([[plate1[0].normal.y, plate1[0].normal.z],
            [plate2[0].normal.y, plate2[0].normal.z]],
            [-plate1[0].constant, -plate2[0].constant]))
-    return [0, solution.x, solution.y]
+    return new THREE.Vector3( 0, solution[0], solution[1] )
+    # return [0, solution[0], solution[1]]
   else if dir.y isnt 0
     solution = numeric.round(numeric.solve([[plate1[0].normal.x, plate1[0].normal.z],
            [plate2[0].normal.x, plate2[0].normal.z]],
            [-plate1[0].constant, -plate2[0].constant]))
-    return [solution.x , 0, solution.y]
+    # return [solution[0] , 0, solution[1]]
+    return new THREE.Vector3( solution[0], 0, solution[1] )
   else if dir.z isnt 0
     solution = numeric.round(numeric.solve([[plate1[0].normal.x, plate1[0].normal.y],
            [plate2[0].normal.x, plate2[0].normal.y]],
            [-plate1[0].constant, -plate2[0].constant]))
-    return [solution.x, solution.y, 0]
+    # return [solution[0], solution[1], 0]
+    return new THREE.Vector3( solution[0], solution[1], 0 )
   else
     console.log "can't solve the linear system.."
 
-checkForBoundaryEdge = (dir, solution) ->
+isOnLine = (linePoint1, dir, pointToTest) ->
+  console.log "dir: #{dir.x}, #{dir.y}, #{dir.z}
+    x: #{pointToTest.x}, #{pointToTest.y}, #{pointToTest.z}
+    vertex: #{linePoint1.x}, #{linePoint1.y}, #{linePoint1.z}"
+  linePoint2 = new THREE.Vector3()
+  linePoint2.addVectors(linePoint1, dir)
 
+  #     |(p-p1) x (p-p2)|
+  # d = ------------------
+  #       |(p2-p1)|
+  pp1 = new THREE.Vector3()
+  pp1.subVectors(pointToTest, linePoint1)
+  pp2 = new THREE.Vector3()
+  pp2.subVectors(pointToTest, linePoint2)
+  cross = new THREE.Vector3()
+  cross.crossVectors(pp1, pp2)
+  numerator = cross.length()
+
+  p2p1 = new THREE.Vector3()
+  p2p1.subVectors(linePoint2, linePoint1)
+  denominator = p2p1.length()
+
+  distance = numerator / denominator
+  console.log distance
+  if distance is 0
+    return true
+  else
+    return false
+
+
+
+checkForBoundaryEdge = (dir, point, plate1, plate2) ->
   # check distance of vertices to line. if distances 0 -> shared edge!
-
+  for edgeLoop in plate1
+    for vertex in edgeLoop.vertices
+      console.log isOnLine(vertex, dir, point)
 
 btnFindIntersection = (event) ->
   event.preventDefault()
@@ -86,9 +121,9 @@ btnFindIntersection = (event) ->
           dir.crossVectors(plate1[0].normal, plate2[0].normal)
           console.log "direction of possible intersection vector:
                  (#{dir.x}, #{dir.y}, #{dir.z})"
-          solution = findPointOnBothPlanes(dir, plate1, plate2)
-          checkForBoundaryEdge(dir, solution)
-
+          point = findPointOnBothPlanes(dir, plate1, plate2)
+          console.log "point on plane: #{point}"
+          checkForBoundaryEdge(dir, point, plate1, plate2)
   else
     console.log 'not enough plates for intersections'
 
@@ -124,7 +159,6 @@ btnScene1 = ( event ) ->
     thickness: 2
     hole: false
     normal: new THREE.Vector3()
-    constant: null
     area: null # will be given but unimportant to me
 
   edgeLoop2 =
@@ -142,7 +176,6 @@ btnScene1 = ( event ) ->
     thickness: 2
     hole: false
     normal: new THREE.Vector3()
-    constant: null
     area: null # will be given but unimportant to me
 
   plate1 = [ edgeLoop1 ]
