@@ -37,6 +37,30 @@ createPlane = (vertex1, vertex2, vertex3) ->
   plane.setFromCoplanarPoints(vertex1, vertex2, vertex3)
   return plane
 
+findPointOnBothPlanes = (dir, plate1, plate2) ->
+  # solve underdetermined (therefore set one value to 0) linear system
+  if dir.x isnt 0
+    solution = numeric.round(numeric.solve([[plate1[0].normal.y, plate1[0].normal.z],
+           [plate2[0].normal.y, plate2[0].normal.z]],
+           [-plate1[0].constant, -plate2[0].constant]))
+    return [0, solution.x, solution.y]
+  else if dir.y isnt 0
+    solution = numeric.round(numeric.solve([[plate1[0].normal.x, plate1[0].normal.z],
+           [plate2[0].normal.x, plate2[0].normal.z]],
+           [-plate1[0].constant, -plate2[0].constant]))
+    return [solution.x , 0, solution.y]
+  else if dir.z isnt 0
+    solution = numeric.round(numeric.solve([[plate1[0].normal.x, plate1[0].normal.y],
+           [plate2[0].normal.x, plate2[0].normal.y]],
+           [-plate1[0].constant, -plate2[0].constant]))
+    return [solution.x, solution.y, 0]
+  else
+    console.log "can't solve the linear system.."
+
+checkForBoundaryEdge = (dir, solution) ->
+
+  # check distance of vertices to line. if distances 0 -> shared edge!
+
 
 btnFindIntersection = (event) ->
   event.preventDefault()
@@ -62,34 +86,9 @@ btnFindIntersection = (event) ->
           dir.crossVectors(plate1[0].normal, plate2[0].normal)
           console.log "direction of possible intersection vector:
                  (#{dir.x}, #{dir.y}, #{dir.z})"
-          console.log "(
-              #{plate1[0].normal.x},
-              #{plate1[0].normal.y},
-              #{plate1[0].normal.z}) * x = -#{plate1[0].constant}  "
-          console.log "(
-              #{plate2[0].normal.x},
-              #{plate2[0].normal.y},
-              #{plate2[0].normal.z}) * x = -#{plate2[0].constant}  "
-          if dir.x isnt 0
-            console.log numeric.solve([[plate1[0].normal.y, plate1[0].normal.z],
-                  [plate2[0].normal.y, plate2[0].normal.z],
-                  -[plate1[0].constant]])
-          else if dir.y isnt 0
-            console.log 'trying to solve system with y != 0'
-            console.log numeric.round(numeric.solve([[1, 2], [3, 4]], [17, 39]))
-            console.log "solve [[#{plate1[0].normal.x}, #{plate1[0].normal.z}],
-                   [#{plate2[0].normal.x}, #{plate2[0].normal.z}]],
-                   [-#{plate1[0].constant}, -#{plate2[0].constant}]"
-            console.log numeric.solve([[plate1[0].normal.x, plate1[0].normal.z],
-                   [plate2[0].normal.x, plate2[0].normal.z]],
-                   [-plate1[0].constant, -plate2[0].constant])
-            #console.log numeric.round(numeric.solve([[0, 1], [1, 0]], [0, 3]))
-          else if dir.z isnt 0
-            console.log numeric.solve([[plate1[0].normal.x, plate1[0].normal.y],
-                  [plate2[0].normal.y, plate2[0].normal.z],
-                  -[plate1[0].constant]])
-          else
-            console.log "can't solve the linear system.."
+          solution = findPointOnBothPlanes(dir, plate1, plate2)
+          checkForBoundaryEdge(dir, solution)
+
   else
     console.log 'not enough plates for intersections'
 
