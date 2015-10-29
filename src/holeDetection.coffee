@@ -2,13 +2,18 @@ THREE = require 'three'
 
 class HoleDetector
 
+  constructor: ->
+    @drawable = new THREE.Object3D()
+
   detectHoles: ( shapes ) ->
     @myShapes = shapes
     for shape in shapes
       shape.detectHoles()
+    @setDrawable()
 
-  getDrawable: () ->
-    node3D = new THREE.Object3D()
+  setDrawable: ->
+    while (@drawable.children.length > 0)
+      @drawable.remove @drawable.childen[0]
     for shape in @myShapes
       for edgeLoop in shape.getEdgeLoops()
         geomToDraw = new THREE.Geometry()
@@ -23,10 +28,9 @@ class HoleDetector
         material = new THREE.MeshBasicMaterial(
           color: if edgeLoop.hole then 0xff0000 else 0x00ff00 )
         mesh = new THREE.Mesh( geomToDraw, material )
-        node3D.add(mesh)
+        @drawable.add(mesh)
 
-    return node3D
-
-
+  getDrawable: ->
+    return @drawable
 
 module.exports = HoleDetector
