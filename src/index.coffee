@@ -12,6 +12,7 @@ CoplanarFaces = require './coplanarFaces'
 HoleDetector = require './holeDetection'
 meshlib = require 'meshlib'
 Util = require './utilityFunctions'
+SVG = require './svg'
 
 ### SCENE SETUP ###
 
@@ -87,6 +88,15 @@ $(->
   $('#slider').slider({
     orientation: 'vertical'
   })
+
+  svg = new SVG()
+  url = svg.getObjectURL()
+  svgDownload = $( '#svgDownload' )
+  svgDownload.attr(
+    'href'
+    url
+    )
+  svgDownload.attr( 'download', 'test.svg' )
 
   view3d = $ '#3d-view'
   $('body')
