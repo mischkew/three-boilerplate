@@ -80,6 +80,11 @@ class ShapesFinder
     shapes = []
     faces = model.model.getFaces()
     shape = @findEdgeLoops faces
+    newEdgeLoops = []
+    for edgeLoop in shape
+      newEdgeLoop = new EdgeLoop(edgeLoop)
+      newEdgeLoops.push newEdgeLoop
+    shape = (new Shape(newEdgeLoops))
     shapes.push shape
     @shapes = shapes
     @setupDrawable()
