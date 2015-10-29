@@ -1,122 +1,119 @@
-THREE = require 'three'
-$ = require 'jquery'
 require('jquery-ui')
 
-view3d = $( '#3d-view' )
-view3d.height '100%'
+THREE = require 'three'
+$ = require 'jquery'
+loader = require './loadModel'
+ShapesFinder = require './findShapes'
+CoplanarFaces = require './coplanarFaces'
+meshlib = require 'meshlib'
 
-console.log 'setup'
 
+### SCENE SETUP ###
+
+# scene
 scene = new THREE.Scene()
+
+# renderer
+renderer = new THREE.WebGLRenderer({ antialias: true })
+renderer.setSize( window.innerWidth, window.innerHeight )
+
+# camera
 camera = new THREE.PerspectiveCamera(
   75
   window.innerWidth / window.innerHeight
   0.1
   1000
 )
-
-renderer = new THREE.WebGLRenderer()
-renderer.setSize( window.innerWidth, window.innerHeight )
-
-
-
-
-edgeSequence1 =
-  vertices: [ new THREE.Vector3( -3, -3, 0 )
-    new THREE.Vector3(  3, -3, 0 )
-    new THREE.Vector3(  3,  3, 0 )
-    new THREE.Vector3( -3,  3, 0 )
-  ]
-  area: null
-  hole: null
-
-edgeSequence2 =
-  vertices: [ new THREE.Vector3( -1, -1, 0 )
-    new THREE.Vector3(  1, -1, 0 )
-    new THREE.Vector3(  1,  1, 0 )
-    new THREE.Vector3( -1,  1, 0 )
-  ]
-  area: null
-  hole: null
-
-shape1 = [ edgeSequence1, edgeSequence2 ]
-
-myObject = [ shape1 ]
-
-for shape in myObject
-  maximumIndex = null
-
-  for sequence, sequenceIndex in shape
-    sequence.area += vertex.x *
-      sequence.vertices[ ( i + 1 ) %% sequence.vertices.length ].y -
-      sequence.vertices[ ( i + 1 ) %% sequence.vertices.length ].x *
-      vertex.y for vertex, i in sequence.vertices
-    sequence.area *= 0.5
-    maximumIndex = sequenceIndex if not shape[maximumIndex]? or
-      shape[maximumIndex]?.area < sequence.area
-    sequence.hole = true
-
-  shape[ maximumIndex ]?.hole = false
-
-
-
-
-for shape, shapeInd in myObject
-  console.log "shape #{shapeInd}"
-  for sequence, sequenceInd in shape
-    console.log "sequence #{sequenceInd}"
-    console.log "area = #{sequence.area}"
-    console.log "hole = #{sequence.hole}"
-
-
-
-for shape in myObject
-
-  for sequence in shape
-    geometry = new THREE.Geometry()
-
-    for vertex, vertexInd in sequence.vertices
-      geometry.vertices.push( vertex )
-
-      if vertexInd >= 2
-        face = new THREE.Face3( 0, vertexInd - 1, vertexInd )
-        geometry.faces.push( face )
-
-    material = new THREE.MeshBasicMaterial(
-      color: if sequence.hole then 0xff0000 else 0x00ff00 )
-    mesh = new THREE.Mesh( geometry, material )
-    scene.add( mesh )
-
-
 camera.position.z = 5
 
+boundingSphere = { radius: 0.866025, center: new THREE.Vector3(0, 0, 0) }
+
+# root object
+root = new THREE.Object3D()
+scene.add(root)
+
+# configure model loading
+_loadModel = loader.loadModel root, camera, scene
+
+# some scene objects
+geometry = new THREE.BoxGeometry(1, 1, 1)
+material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } )
+
+cube2 = new THREE.Mesh( geometry, material )
+cube2Translation = 0.05
+
+root.add( cube2 )
+
+loader.zoomTo boundingSphere, camera, scene
+
+### HELPERS ###
 
 render = ->
   requestAnimationFrame(render)
+
+  for child in root.children
+    child.rotation.x += 0.02
+    child.rotation.y += 0.01
+
   renderer.render(scene, camera)
 
-setupRenderSize = ->
+setupRenderSize = (view3d) ->
   camera = new THREE.PerspectiveCamera(
-    75
+    50
     view3d.width() / view3d.height()
     0.1
     1000
   )
   camera.position.z = 5
   renderer.setSize( view3d.width(), view3d.height() )
+  loader.zoomTo boundingSphere, camera, scene
 
+stopEvent = (event) ->
+  event.preventDefault()
+  event.stopPropagation()
 
-$(window).resize ->
-  setupRenderSize()
+clearScene = ->
+  while (root.children.length > 0)
+    root.remove root.children[0]
 
-# on load render
+### INITIALIZATION ###
+
 $(->
-  view3d = $( '#3d-view' )
-  view3d.height '100%'
-  setupRenderSize()
-  view3d.append $( renderer.domElement )
+  # ui helpers
   $('#slider').slider({
     orientation: 'vertical'
-    })
+  })
+
+  view3d = $ '#3d-view'
+  $('body')
+    .on 'drop', (event) ->
+      _loadModel event.originalEvent
+        .then (obj) ->
+          boundingSphere = obj.geometry.boundingSphere
+          model = obj.model
+          setupRenderSize view3d
+          coplanarFaces = new CoplanarFaces()
+          #coplanarFaces.setDebug true
+          coplanarFaces.setThreshold 0.001
+          faceSets = coplanarFaces.findCoplanarFaces model
+          shapesFinder = new ShapesFinder()
+          shapesFinder.findShapesFromFaceSets faceSets
+          clearScene()
+          coplanarFaces.setupDrawable()
+          root.add coplanarFaces.getDrawable()
+          root.add shapesFinder.getDrawable()
+          console.log 'END'
+      stopEvent event
+    .on 'dragenter', stopEvent
+    .on 'dragleave', stopEvent
+    .on 'dragover', stopEvent
+
+  # rendering
+  view3d.height '100%'
+  setupRenderSize(view3d)
+  $(window).resize ->
+    setupRenderSize(view3d)
+  view3d.append renderer.domElement
+
   render()
 )
