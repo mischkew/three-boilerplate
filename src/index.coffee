@@ -2,12 +2,15 @@ require('jquery-ui')
 
 THREE = require 'three'
 $ = require 'jquery'
+require('jquery-ui')
+HoleDetection = require './holeDetection'
+EdgeLoop = require './edgeLoop'
+Shape = require './shape'
 loader = require './loadModel'
 ShapesFinder = require './findShapes'
 CoplanarFaces = require './coplanarFaces'
 meshlib = require 'meshlib'
 Util = require './utilityFunctions'
-
 
 ### SCENE SETUP ###
 
@@ -47,7 +50,6 @@ root.add( cube2 )
 
 loader.zoomTo boundingSphere, camera, scene
 
-
 ### HELPERS ###
 
 render = ->
@@ -79,7 +81,6 @@ clearScene = ->
     root.remove root.children[0]
 
 ### INITIALIZATION ###
-
 $(->
   # ui helpers
   $('#slider').slider({
