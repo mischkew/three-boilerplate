@@ -31,6 +31,18 @@ clearScene = ->
   sceneGraph.children = []
 
 
+calcNormalizedNormal = (vertex1, vertex2, vertex3) ->
+  vector1 = new THREE.Vector3()
+  vector2 = new THREE.Vector3()
+  vector1.subVectors(vertex2, vertex1)
+  vector2.subVectors(vertex3, vertex1)
+
+  crossProduct = new THREE.Vector3()
+  crossProduct.crossVectors(vector1, vector2)
+  normal = new THREE.Vector3()
+  normal = crossProduct.divideScalar(crossProduct.length())
+  return normal
+
 
 btnFindIntersection = (event) ->
   event.preventDefault()
@@ -41,42 +53,20 @@ btnFindIntersection = (event) ->
     console.log 'intersections possible'
     for plate1, index in myObject
       if index + 1 < myObject.length
-        index2 = index + 1
         for plate2 in myObject[index + 1...myObject.length]
           alert "testing #{plate1[0].name} with #{plate2[0].name}"
-          index2 = index2 + 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    #
-    # for plate1, index1 in myObject
-    #   console.log "index is #{index1} length is #{myObject.length}"
-    #   if index1 < myObject.length
-    #     index2 = index1
-    #     for plate2 in [index1...myObject.length]
-    #
-    #        if plate1 isnt plate2
-    #          alert "testing #{plate1[index1].name} current index is #{index2}"
-    #        index2 = index2+1
-
-
-
-
+          normal = calcNormalizedNormal(
+            plate1[0].vertices[0],
+            plate1[0].vertices[1],
+            plate1[0].vertices[2] )
+          console.log "Normal of first plate:
+            (#{normal.x},#{normal.y},#{normal.z})"
+          normal2 = calcNormalizedNormal(
+            plate2[0].vertices[0],
+            plate2[0].vertices[1],
+            plate2[0].vertices[2] )
+          console.log "Normal of second plate:
+            (#{normal2.x},#{normal2.y},#{normal2.z})"
 
   else
     console.log 'not enough plates for intersections'
@@ -112,7 +102,8 @@ btnScene1 = ( event ) ->
     name: '1'
     thickness: 2
     hole: false
-    # area: null
+    normal: null
+    area: null # will be given but unimportant to me
 
   edgeLoop2 =
     vertices: [
@@ -124,7 +115,8 @@ btnScene1 = ( event ) ->
     name: '2'
     thickness: 2
     hole: false
-    # area: null
+    normal: null
+    area: null # will be given but unimportant to me
 
   plate1 = [ edgeLoop1 ]
   plate2 = [ edgeLoop2 ]
