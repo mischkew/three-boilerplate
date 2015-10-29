@@ -9,9 +9,9 @@ class HoleDetector
     @myShapes = shapes
     for shape in shapes
       shape.detectHoles()
-    @setDrawable()
+    @setupDrawable()
 
-  setDrawable: ->
+  setupDrawable: ->
     while (@drawable.children.length > 0)
       @drawable.remove @drawable.childen[0]
     for shape in @myShapes
