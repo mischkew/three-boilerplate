@@ -5,6 +5,7 @@ OrbitControls = require('three-orbit-controls')(THREE)
 $ = require 'jquery'
 require('jquery-ui')
 HoleDetection = require './holeDetection'
+ShapeRotator = require './shapeRotator'
 EdgeLoop = require './edgeLoop'
 Shape = require './shape'
 loader = require './loadModel'
@@ -62,6 +63,13 @@ myObject = null
 clearScene = ->
   sceneGraph.children = []
 
+btnPlanify = ->
+  clearScene()
+
+  rotator = new ShapeRotator()
+  rotator.layIntoXYPlane( myObject )
+  drawable = rotator.getDrawable()
+  sceneGraph.add( drawable )
 
 btnHolify = ->
   clearScene()
@@ -157,7 +165,7 @@ btnTest3 = ( event ) ->
     new THREE.Vector3(  -1, 1, 2 )
    ] )
 
-  normal = THREE.Vector3( 0.577350269, -0.577350269, 0.577350269 )
+  normal = new THREE.Vector3( 0.577350269, -0.577350269, 0.577350269 )
 
   shape1 = new Shape( [ edgeLoop1, edgeLoop2 ], normal )
 
@@ -254,6 +262,7 @@ $(->
   $('#btnTest3').button().click( btnTest3 )
   $('#btnTest4').button().click( btnTest4 )
   $('#btnTest5').button().click( btnTest5 )
+  $('#btnplanify').button().click( btnPlanify )
   $('#btnHolify').button().click( btnHolify )
 
 
