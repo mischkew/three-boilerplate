@@ -90,6 +90,13 @@ $(->
   })
 
   svg = new SVG()
+  svgEdgeLoop = new EdgeLoop([
+    new THREE.Vector3( 50, 50, 0)
+    new THREE.Vector3( 100, 50, 0)
+    new THREE.Vector3( 50, 100, 0)
+  ])
+  svgShape = new Shape([svgEdgeLoop])
+  svg.addShape svgShape
   url = svg.getObjectURL()
   svgDownload = $( '#svgDownload' )
   svgDownload.attr(
