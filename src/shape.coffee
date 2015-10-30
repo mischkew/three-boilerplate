@@ -1,8 +1,9 @@
 EdgeLoop = require './edgeLoop'
 
 class Shape
-  constructor: ( edgeLoops ) ->
+  constructor: ( edgeLoops, normal) ->
     @edgeLoops = edgeLoops
+    @normal = normal
 
   getEdgeLoops: ->
     return @edgeLoops
