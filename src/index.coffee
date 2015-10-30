@@ -89,7 +89,8 @@ $(->
     orientation: 'vertical'
   })
 
-  svg = new SVG()
+  # ======= SVG test =========
+  svg = new SVG(300, 400)
   svgEdgeLoop = new EdgeLoop([
     new THREE.Vector3( 50, 50, 0)
     new THREE.Vector3( 100, 50, 0)
@@ -104,6 +105,7 @@ $(->
     url
     )
   svgDownload.attr( 'download', 'test.svg' )
+  # ======= SVG test =========
 
   view3d = $ '#3d-view'
   $('body')

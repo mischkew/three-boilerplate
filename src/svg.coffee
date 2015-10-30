@@ -2,8 +2,10 @@
 
 class SVG
 
-  constructor: ->
+  constructor: (width, height) ->
     @shapes = []
+    @width = width
+    @height = height
 
   addShape: ( shape ) ->
     @shapes.push( shape )
@@ -12,8 +14,6 @@ class SVG
     @shapes.concat shapes
 
   getObjectURL: ->
-    width = 400
-    height = 300
     text = ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n
       <!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"
       \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n
@@ -22,8 +22,8 @@ class SVG
       xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n
       xmlns:ev=\"http://www.w3.org/2001/xml-events\"\n
       version=\"1.1\" baseProfile=\"full\"\n
-      width=\"#{width}mm\" height=\"#{height}mm\"\n
-      viewBox=\"0 0 #{width} #{height}\">"]
+      width=\"#{@width}mm\" height=\"#{@height}mm\"\n
+      viewBox=\"0 0 #{@width} #{@height}\">"]
 
     text.push '<rect\n
          style="fill:#ddddff;fill-rule:evenodd;
