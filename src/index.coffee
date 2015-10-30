@@ -103,7 +103,9 @@ btnTest1 = ( event ) ->
     new THREE.Vector3( -1,  1, 0 )
   ] )
 
-  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ] )
+  normal = new THREE.Vector3( 0, 0, 1 )
+
+  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ], normal )
 
   myObject = [ shape1 ]
 
@@ -133,7 +135,9 @@ btnTest2 = ( event ) ->
     new THREE.Vector3( -1, 1, 0 )
   ] )
 
-  shape1 = new Shape( [ edgeLoop1, edgeLoop2, edgeLoop3 ] )
+  normal = new THREE.Vector3( 0, 0, 1 )
+
+  shape1 = new Shape( [ edgeLoop1, edgeLoop2, edgeLoop3 ], normal )
 
   myObject = [ shape1 ]
 
@@ -153,7 +157,9 @@ btnTest3 = ( event ) ->
     new THREE.Vector3(  -1, 1, 2 )
    ] )
 
-  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ] )
+  normal = THREE.Vector3( 0.577350269, -0.577350269, 0.577350269 )
+
+  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ], normal )
 
   myObject = [ shape1 ]
 
@@ -173,7 +179,9 @@ btnTest4 = ( event ) ->
     new THREE.Vector3(  0, 0, 1 )
   ] )
 
-  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ] )
+  normal = new THREE.Vector3( 0, 1, 0 )
+
+  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ], normal )
 
   myObject = [ shape1 ]
 
@@ -193,7 +201,9 @@ btnTest5 = ( event ) ->
     new THREE.Vector3(  0, 0, 1 )
   ] )
 
-  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ] )
+  normal = new THREE.Vector3( 1, 0, 0 )
+
+  shape1 = new Shape( [ edgeLoop1, edgeLoop2 ], normal )
 
   myObject = [ shape1 ]
 
