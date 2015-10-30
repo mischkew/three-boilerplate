@@ -82,6 +82,7 @@ class ShapesFinder
     shape = @findEdgeLoops faces
     newEdgeLoops = []
     for edgeLoop in shape
+      edgeLoop.pop()
       newEdgeLoop = new EdgeLoop(edgeLoop)
       newEdgeLoops.push newEdgeLoop
     shape = (new Shape(newEdgeLoops))
@@ -99,6 +100,7 @@ class ShapesFinder
     for shape in shapes
       newEdgeLoops = []
       for edgeLoop in shape
+        edgeLoop.pop()
         newEdgeLoop = new EdgeLoop(edgeLoop)
         newEdgeLoops.push newEdgeLoop
       newShapes.push (new Shape(newEdgeLoops))
@@ -131,6 +133,11 @@ class ShapesFinder
         for vertex in edgeLoop.vertices
           v = new THREE.Vector3(vertex.x, vertex.y, vertex.z)
           geometry.vertices.push v
+        vertex = new THREE.Vector3(
+          edgeLoop.vertices[0].x,
+          edgeLoop.vertices[0].y,
+          edgeLoop.vertices[0].z)
+        geometry.vertices.push vertex
         geometry.computeLineDistances()
         obj = new THREE.Line( geometry, material )
         @drawable.add obj
