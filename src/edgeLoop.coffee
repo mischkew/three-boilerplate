@@ -23,7 +23,7 @@ class EdgeLoop
   layIntoXYPlane: ( rotationMatrix ) ->
     @xyPlaneVertices = []
     for vertex in @vertices
-      planeVertex = vertex.clone()
+      planeVertex = new THREE.Vector3( vertex.x, vertex.y, vertex.z )
       planeVertex.applyMatrix3 rotationMatrix
       @xyPlaneVertices.push planeVertex
 
