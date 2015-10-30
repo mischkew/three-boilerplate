@@ -9,6 +9,7 @@ Shape = require './shape'
 loader = require './loadModel'
 ShapesFinder = require './findShapes'
 CoplanarFaces = require './coplanarFaces'
+HoleDetector = require './holeDetection'
 meshlib = require 'meshlib'
 Util = require './utilityFunctions'
 
@@ -104,12 +105,18 @@ $(->
           faceSets = coplanarFaces.findCoplanarFaces model
 
           shapesFinder = new ShapesFinder()
-          shapesFinder.findShapesFromFaceSets faceSets
+          shapes = shapesFinder.findShapesFromFaceSets faceSets
+
+          holeDetector = new HoleDetector()
+          holeDetector.detectHoles(shapes)
 
           clearScene()
           coplanarFaces.setupDrawable()
-          root.add coplanarFaces.getDrawable()
+          root.add coplanarFaces.getDrawable().translateX(
+            2 * boundingSphere.radius)
           root.add shapesFinder.getDrawable()
+          root.add holeDetector.getDrawable().translateX(
+            2 * -boundingSphere.radius)
           console.log 'END'
       stopEvent event
     .on 'dragenter', stopEvent

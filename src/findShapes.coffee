@@ -2,6 +2,8 @@ THREE = require 'three'
 $ = require 'jquery'
 require 'meshlib'
 Util = require './utilityFunctions'
+Shape = require './shape'
+EdgeLoop = require './edgeloop'
 
 class ShapesFinder
   constructor: ->
@@ -78,6 +80,11 @@ class ShapesFinder
     shapes = []
     faces = model.model.getFaces()
     shape = @findEdgeLoops faces
+    newEdgeLoops = []
+    for edgeLoop in shape
+      newEdgeLoop = new EdgeLoop(edgeLoop)
+      newEdgeLoops.push newEdgeLoop
+    shape = (new Shape(newEdgeLoops))
     shapes.push shape
     @shapes = shapes
     @setupDrawable()
@@ -88,9 +95,16 @@ class ShapesFinder
     for faceSet in faceSets
       shape = @findEdgeLoops faceSet
       shapes.push shape
-    @shapes = shapes
+    newShapes = []
+    for shape in shapes
+      newEdgeLoops = []
+      for edgeLoop in shape
+        newEdgeLoop = new EdgeLoop(edgeLoop)
+        newEdgeLoops.push newEdgeLoop
+      newShapes.push (new Shape(newEdgeLoops))
+    @shapes = newShapes
     @setupDrawable()
-    return shapes
+    return newShapes
 
 # coffeelint: disable=cyclomatic_complexity
   getColorFromIndex: ( index ) ->
@@ -109,12 +123,12 @@ class ShapesFinder
       @drawable.remove @drawable.children[0]
     for shape, i in @shapes
       lineColor = @getColorFromIndex i
-      for edgeLoop in shape
+      for edgeLoop in shape.getEdgeLoops()
         material =
           new THREE.LineDashedMaterial(
             { color: lineColor, dashSize: 0.1, gapSize: 0.3 })
         geometry = new THREE.Geometry()
-        for vertex in edgeLoop
+        for vertex in edgeLoop.vertices
           v = new THREE.Vector3(vertex.x, vertex.y, vertex.z)
           geometry.vertices.push v
         geometry.computeLineDistances()
