@@ -26,7 +26,8 @@ class HoleDetector
             geomToDraw.faces.push( face )
 
         material = new THREE.MeshBasicMaterial(
-          color: if edgeLoop.hole then 0xff0000 else 0x00ff00 )
+          color: if edgeLoop.hole then 0xff0000 else 0x00ff00,
+          side: 2 )
         mesh = new THREE.Mesh( geomToDraw, material )
         @drawable.add(mesh)
 
