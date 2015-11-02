@@ -17,9 +17,10 @@ class ShapesFinder
     return outIndex
 
   getEdges: (faces) ->
+    normal = new THREE.Vector3( 0, 0, 0 )
     edges = []
     for face in faces
-      indexedFace = []
+      normal.add(face.normal)
       for i in [0..2]
         j = @nextVertexIndex i
         edge = [face.vertices[i], face.vertices[j]]
@@ -30,7 +31,8 @@ class ShapesFinder
             edges.splice(i, 1)
         if not found
           edges.push edge
-    return edges
+    normal.normalize()
+    return { edges, normal }
 
   mergeTwoEdges: (edge1, edge2) ->
     added = no
@@ -72,31 +74,40 @@ class ShapesFinder
     return edges
 
   findEdgeLoops: (faces) ->
-    edges = @getEdges faces
-    edgeLoops = @getEdgeLoops edges
-    return edgeLoops
+    edgesNormalTuple = @getEdges faces
+    edgeLoops = @getEdgeLoops edgesNormalTuple.edges
+    normal = edgesNormalTuple.normal
+    return { edgeLoops, normal }
 
   findShapesFromModel: (model) ->
     shapes = []
     faces = model.model.getFaces()
-    shape = @findEdgeLoops faces
+    shapeNormalTuple = @findEdgeLoops faces
+    shape = shapeNormalTuple.edgeLoops
+    normal = shapeNormalTuple.normal
+    newEdgeLoops = []
+    for edgeLoop in shape
+      edgeLoop.pop()
+      newEdgeLoop = new EdgeLoop(edgeLoop)
+      newEdgeLoops.push newEdgeLoop
+    shape = new Shape( newEdgeLoops, normal )
     shapes.push shape
     @shapes = shapes
     @setupDrawable()
     return shapes
 
   findShapesFromFaceSets: ( faceSets ) ->
-    shapes = []
-    for faceSet in faceSets
-      shape = @findEdgeLoops faceSet
-      shapes.push shape
     newShapes = []
-    for shape in shapes
+    for faceSet in faceSets
+      shapeNormalTuple = @findEdgeLoops faceSet
+      shape = shapeNormalTuple.edgeLoops
+      normal = shapeNormalTuple.normal
       newEdgeLoops = []
       for edgeLoop in shape
+        edgeLoop.pop()
         newEdgeLoop = new EdgeLoop(edgeLoop)
         newEdgeLoops.push newEdgeLoop
-      newShapes.push (new Shape(newEdgeLoops))
+      newShapes.push new Shape( newEdgeLoops, normal )
     @shapes = newShapes
     @setupDrawable()
     return newShapes
@@ -126,6 +137,11 @@ class ShapesFinder
         for vertex in edgeLoop.vertices
           v = new THREE.Vector3(vertex.x, vertex.y, vertex.z)
           geometry.vertices.push v
+        vertex = new THREE.Vector3(
+          edgeLoop.vertices[0].x,
+          edgeLoop.vertices[0].y,
+          edgeLoop.vertices[0].z)
+        geometry.vertices.push vertex
         geometry.computeLineDistances()
         obj = new THREE.Line( geometry, material )
         @drawable.add obj

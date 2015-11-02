@@ -4,6 +4,7 @@ THREE = require 'three'
 $ = require 'jquery'
 require('jquery-ui')
 HoleDetection = require './holeDetection'
+ShapeRotator = require './shapeRotator'
 EdgeLoop = require './edgeLoop'
 Shape = require './shape'
 loader = require './loadModel'
@@ -51,6 +52,7 @@ cube2Translation = 0.05
 root.add( cube2 )
 
 loader.zoomTo boundingSphere, camera, scene
+
 
 ### HELPERS ###
 
@@ -133,8 +135,11 @@ $(->
           shapesFinder = new ShapesFinder()
           shapes = shapesFinder.findShapesFromFaceSets faceSets
 
+          shapeRotator = new ShapeRotator()
+          shapeRotator.layIntoXYPlane( shapes )
+
           holeDetector = new HoleDetector()
-          holeDetector.detectHoles(shapes)
+          holeDetector.detectHoles( shapes )
 
           clearScene()
           coplanarFaces.setupDrawable()
