@@ -40,16 +40,19 @@ class Shape
     sinOfAngle = Math.sin(angle)
     oneMinusCos = 1 - cosOfAngle
 
+    oneMinusCosTimesX = oneMinusCos * rotation.x
+    oneMinusCosTimesY = oneMinusCos * rotation.y
+
     rotationMatrix = new THREE.Matrix3()
     rotationMatrix.set(
-      oneMinusCos * rotation.x * rotation.x + cosOfAngle,
-      oneMinusCos * rotation.x * rotation.y - sinOfAngle * rotation.z,
-      oneMinusCos * rotation.x * rotation.z + sinOfAngle * rotation.y,
-      oneMinusCos * rotation.x * rotation.y + sinOfAngle * rotation.z,
-      oneMinusCos * rotation.y * rotation.y + cosOfAngle,
-      oneMinusCos * rotation.y * rotation.z - sinOfAngle * rotation.x,
-      oneMinusCos * rotation.x * rotation.y + sinOfAngle * rotation.z,
-      oneMinusCos * rotation.y * rotation.z + sinOfAngle * rotation.x,
+      oneMinusCosTimesX * rotation.x + cosOfAngle,
+      oneMinusCosTimesX * rotation.y - sinOfAngle * rotation.z,
+      oneMinusCosTimesX * rotation.z + sinOfAngle * rotation.y,
+      oneMinusCosTimesX * rotation.y + sinOfAngle * rotation.z,
+      oneMinusCosTimesY * rotation.y + cosOfAngle,
+      oneMinusCosTimesY * rotation.z - sinOfAngle * rotation.x,
+      oneMinusCosTimesX * rotation.y + sinOfAngle * rotation.z,
+      oneMinusCosTimesY * rotation.z + sinOfAngle * rotation.x,
       oneMinusCos * rotation.z * rotation.z + cosOfAngle)
 
     for edgeLoop in @edgeLoops
