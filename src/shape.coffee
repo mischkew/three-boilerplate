@@ -5,6 +5,7 @@ class Shape
   constructor: ( edgeLoops, normal ) ->
     @edgeLoops = edgeLoops
     @normal = normal
+    @rotationMatrix = null
 
   getEdgeLoops: ->
     return @edgeLoops
@@ -43,8 +44,8 @@ class Shape
     oneMinusCosTimesX = oneMinusCos * rotation.x
     oneMinusCosTimesY = oneMinusCos * rotation.y
 
-    rotationMatrix = new THREE.Matrix3()
-    rotationMatrix.set(
+    @rotationMatrix = new THREE.Matrix3()
+    @rotationMatrix.set(
       oneMinusCosTimesX * rotation.x + cosOfAngle,
       oneMinusCosTimesX * rotation.y - sinOfAngle * rotation.z,
       oneMinusCosTimesX * rotation.z + sinOfAngle * rotation.y,
@@ -56,7 +57,7 @@ class Shape
       oneMinusCos * rotation.z * rotation.z + cosOfAngle)
 
     for edgeLoop in @edgeLoops
-      edgeLoop.layIntoXYPlane rotationMatrix
+      edgeLoop.layIntoXYPlane @rotationMatrix
 
 
 module.exports = Shape
