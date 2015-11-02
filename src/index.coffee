@@ -91,12 +91,19 @@ $(->
 
   # ======= SVG test =========
   svg = new SVG(300, 400)
-  svgEdgeLoop = new EdgeLoop([
+  svgEdgeLoop1 = new EdgeLoop([
+    new THREE.Vector3( 20, 20, 0)
+    new THREE.Vector3( 20, 50, 0)
     new THREE.Vector3( 50, 50, 0)
-    new THREE.Vector3( 100, 50, 0)
-    new THREE.Vector3( 50, 100, 0)
+    new THREE.Vector3( 50, 20, 0)
   ])
-  svgShape = new Shape([svgEdgeLoop])
+  svgEdgeLoop2 = new EdgeLoop([
+    new THREE.Vector3( 30, 30, 0)
+    new THREE.Vector3( 30, 40, 0)
+    new THREE.Vector3( 40, 40, 0)
+    new THREE.Vector3( 40, 30, 0)
+  ])
+  svgShape = new Shape([svgEdgeLoop1, svgEdgeLoop2])
   svg.addShape svgShape
   url = svg.getObjectURL()
   svgDownload = $( '#svgDownload' )
