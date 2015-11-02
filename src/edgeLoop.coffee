@@ -16,8 +16,7 @@ class EdgeLoop
         nextI = ( i + 1 ) %% @xyPlaneVertices.length
         @area += vertex.x * @xyPlaneVertices[ nextI ].y -
           vertex.y * @xyPlaneVertices[ nextI ].x
-      @area *= 0.5
-      @area = Math.abs( @area )
+      @area = 0.5 * Math.abs( @area )
     return @area
 
   layIntoXYPlane: ( rotationMatrix ) ->

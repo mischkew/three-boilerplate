@@ -5,6 +5,7 @@ class Shape
   constructor: ( edgeLoops, normal ) ->
     @edgeLoops = edgeLoops
     @normal = normal
+    @rotationMatrix = null
 
   getEdgeLoops: ->
     return @edgeLoops
@@ -31,25 +32,32 @@ class Shape
 
   layIntoXYPlane: ->
     zAxis = new THREE.Vector3( 0, 0, 1 )
-    rotationAxis = new THREE.Vector3( 0, 0, 1 )
-    rotationAxis.cross( @normal )
+    rotation = new THREE.Vector3( 0, 0, 1 )
+    rotation.cross( @normal )
     dot = zAxis.dot( @normal )
     angle = -Math.acos( dot )
 
-    rotationMatrix = new THREE.Matrix3()
-    rotationMatrix.set(
-      ( 1 - Math.cos(angle) ) * rotationAxis.x * rotationAxis.x + Math.cos(angle),
-      ( 1 - Math.cos(angle) ) * rotationAxis.x * rotationAxis.y - Math.sin(angle) * rotationAxis.z,
-      ( 1 - Math.cos(angle) ) * rotationAxis.x * rotationAxis.z + Math.sin(angle) * rotationAxis.y,
-      ( 1 - Math.cos(angle) ) * rotationAxis.x * rotationAxis.y + Math.sin(angle) * rotationAxis.z,
-      ( 1 - Math.cos(angle) ) * rotationAxis.y * rotationAxis.y + Math.cos(angle),
-      ( 1 - Math.cos(angle) ) * rotationAxis.y * rotationAxis.z - Math.sin(angle) * rotationAxis.x,
-      ( 1 - Math.cos(angle) ) * rotationAxis.x * rotationAxis.y + Math.sin(angle) * rotationAxis.z,
-      ( 1 - Math.cos(angle) ) * rotationAxis.y * rotationAxis.z + Math.sin(angle) * rotationAxis.x,
-      ( 1 - Math.cos(angle) ) * rotationAxis.z * rotationAxis.z + Math.cos(angle))
+    cosOfAngle = Math.cos(angle)
+    sinOfAngle = Math.sin(angle)
+    oneMinusCos = 1 - cosOfAngle
+
+    oneMinusCosTimesX = oneMinusCos * rotation.x
+    oneMinusCosTimesY = oneMinusCos * rotation.y
+
+    @rotationMatrix = new THREE.Matrix3()
+    @rotationMatrix.set(
+      oneMinusCosTimesX * rotation.x + cosOfAngle,
+      oneMinusCosTimesX * rotation.y - sinOfAngle * rotation.z,
+      oneMinusCosTimesX * rotation.z + sinOfAngle * rotation.y,
+      oneMinusCosTimesX * rotation.y + sinOfAngle * rotation.z,
+      oneMinusCosTimesY * rotation.y + cosOfAngle,
+      oneMinusCosTimesY * rotation.z - sinOfAngle * rotation.x,
+      oneMinusCosTimesX * rotation.y + sinOfAngle * rotation.z,
+      oneMinusCosTimesY * rotation.z + sinOfAngle * rotation.x,
+      oneMinusCos * rotation.z * rotation.z + cosOfAngle)
 
     for edgeLoop in @edgeLoops
-      edgeLoop.layIntoXYPlane rotationMatrix
+      edgeLoop.layIntoXYPlane @rotationMatrix
 
 
 module.exports = Shape
