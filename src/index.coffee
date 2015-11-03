@@ -3,7 +3,7 @@ $ = require 'jquery'
 #OrbitControls = require('three-orbit-controls')(THREE)
 require('jquery-ui')
 numeric = require './numeric-1.2.6.js'
-Graph = require './CreateGraph'
+Graph = require './createGraph'
 
 # see mdn Math for math functions
 
@@ -147,6 +147,9 @@ reset = ->
 
 render = ->
   requestAnimationFrame( render )
+  for child in sceneGraph.children
+    child.rotation.x += 0.008
+    child.rotation.y += 0.004
   renderer.render(scene, camera)
 
 

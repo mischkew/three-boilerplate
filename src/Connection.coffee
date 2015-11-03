@@ -1,4 +1,4 @@
-require './ConnectionParameters'
+require './connectionParameters'
 
 class Connection
   constructor: (node, parameters) ->

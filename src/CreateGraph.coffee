@@ -1,13 +1,15 @@
-require './Node'
-require './ConnectionParameters'
-require './Connection'
-require './PlateGraph'
+Node = require './node'
+Plate = require './plate'
+Shape = require './shape'
+require './connectionParameters'
+Connection = require './connection'
+PlateGraph = require './plateGraph'
 THREE = require 'three'
 numeric = require './numeric-1.2.6.js'
 
 class CreateGraph
   constructor: ->
-    @plates = []
+    @plateGraph = new PlateGraph()
     @newSceneElements = []
 
   createGraph: (plates, model) ->
@@ -44,15 +46,13 @@ class CreateGraph
       return false
 
   isOnLine = (linePoint1, dir, pointToTest) ->
-    console.log "dir: #{dir.x}, #{dir.y}, #{dir.z}
-      x: #{pointToTest.x}, #{pointToTest.y}, #{pointToTest.z}
-      vertex: #{linePoint1.x}, #{linePoint1.y}, #{linePoint1.z}"
     linePoint2 = new THREE.Vector3()
     linePoint2.addVectors(linePoint1, dir)
 
     #     |(p-p1) x (p-p2)|
     # d = ------------------
     #       |(p2-p1)|
+
     pp1 = new THREE.Vector3()
     pp1.subVectors(pointToTest, linePoint1)
     pp2 = new THREE.Vector3()
@@ -66,7 +66,6 @@ class CreateGraph
     denominator = p2p1.length()
 
     distance = numerator / denominator
-    console.log "distance: #{distance}"
     if distance is 0
       return true
     else
@@ -76,6 +75,9 @@ class CreateGraph
     # check distance of vertices to line. if distances 0 -> shared edge!
     pointsOnLine1 = []
     pointsOnLine2 = []
+
+    p1 = new Plate( new Shape( plate1, plate1[0].normal ), plate1[0].thickness )
+    p2 = new Plate( new Shape( plate2, plate2[0].normal ), plate2[0].thickness )
     onLineCounter1 = 0
     for edgeLoop in plate1
       for vertex in edgeLoop.vertices
@@ -99,10 +101,18 @@ class CreateGraph
       line = new THREE.Line( geometry, material )
       @newSceneElements.push( line )
       console.log 'added line'
+      @plateGraph.addNode(p1)
+      @plateGraph.addNode(p2)
+      connection = new Connection()
+      #               n1 * n2
+      # cos(alpha) = ---------
+      #              |n1|*|n2| ( = 1 because normals are normalized )
+      numerator = plate1[0].normal.dot(plate2[0].normal)
+      angle = Math.acos( numerator ) / (Math.PI / 180)
+      console.log "Added connection with angle: #{angle}"
+      @plateGraph.addConnection(p1, p2, angle, null)
     else
       console.log 'not enough points on intersection'
-
-
 
   findIntersection: (plates) ->
     console.log 'calculations started'

@@ -1,6 +1,6 @@
-require './Node'
-require './ConnectionParameters'
-require './Connection'
+require './node'
+ConnectionParameters = require './connectionParameters'
+Connection = require './connection'
 
 class PlateGraph
   constructor: ->

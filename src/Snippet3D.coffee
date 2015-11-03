@@ -1,4 +1,4 @@
-Node = require './Node'
+Node = require './node'
 
 class Snippet3D extends Node
   constructor: (@model) ->
