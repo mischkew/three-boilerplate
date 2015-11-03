@@ -40,16 +40,44 @@ drawLines = ( object ) ->
 
   material = new THREE.LineBasicMaterial( color: 0xAAAAAA )
   for plate in object
+    edgeLoop = plate.shape.edgeLoops[0]
+    plane = new THREE.Plane()
+    plane.setFromCoplanarPoints(
+                        edgeLoop.vertices[0]
+                        edgeLoop.vertices[1]
+                        edgeLoop.vertices[2])
+    plate.shape.normal = plane.normal
     for edgeLoop in plate.shape.edgeLoops
       geometry = new THREE.Geometry()
       for vertex in edgeLoop.vertices
         geometry.vertices.push( vertex )
 
       geometry.vertices.push( edgeLoop.vertices[0] )
-
       line = new THREE.Line( geometry, material )
       sceneGraph.add( line )
 
+drawParallelLines = (object) ->
+  material = new THREE.LineBasicMaterial( color: 0xff0000 )
+  material2 = new THREE.LineBasicMaterial( color: 0x00ff00 )
+  for plate in object
+    translationVector = plate.shape.normal
+    translationVector.multiplyScalar( plate.thickness )
+    for edgeLoop in plate.shape.edgeLoops
+      geometry = new THREE.Geometry()
+      for vertex in edgeLoop.vertices
+        geometry2 = new THREE.Geometry()
+        translatedVertex = new THREE.Vector3()
+        translatedVertex.addVectors(vertex, translationVector)
+        geometry.vertices.push( translatedVertex )
+        geometry2.vertices.push( vertex, translatedVertex )
+        line2 = new THREE.Line( geometry2, material2 )
+        sceneGraph.add( line2 )
+      translatedFirstVertex = new THREE.Vector3()
+      translatedFirstVertex.addVectors(edgeLoop.vertices[0], translationVector )
+      geometry.vertices.push( translatedFirstVertex )
+
+      line = new THREE.Line( geometry, material )
+      sceneGraph.add( line )
 
 btnScene = ( event ) ->
   event.preventDefault()
@@ -100,6 +128,7 @@ btnScene = ( event ) ->
   myObject = [ plate1, plate2, plate3, plate4 ]
 
   drawLines( myObject )
+  drawParallelLines( myObject )
 
 
 btnCalculate = (event) ->
@@ -112,6 +141,7 @@ btnCalculate = (event) ->
 
 reset = ->
   drawLines( myObject )
+  drawParallelLines( myObject )
 
 render = ->
   requestAnimationFrame( render )
