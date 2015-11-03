@@ -1,7 +1,7 @@
 Node = require './node'
 
 class Plate extends Node
-  constructor: (@shape, @thickness) ->
+  constructor: (@shape, @thickness, @planeConstant) ->
     super()
     # thickness in the direction of the normal
 

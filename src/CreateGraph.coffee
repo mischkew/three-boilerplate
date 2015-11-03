@@ -21,32 +21,32 @@ class CreateGraph
     plane.setFromCoplanarPoints(vertex1, vertex2, vertex3)
     return plane
 
-  findPointOnBothPlanes: (dir, plate1, plate2) ->
+  findPointOnBothPlanes: (dir, node1, node2) ->
     # solve underdetermined linear system (therefore set one value to 0)
     if dir.x isnt 0
       solution = numeric.round(numeric.solve(
-            [[plate1[0].normal.y, plate1[0].normal.z],
-            [plate2[0].normal.y, plate2[0].normal.z]],
-            [-plate1[0].constant, -plate2[0].constant]))
+            [[node1.shape.normal.y, node1.shape.normal.z],
+            [node2.shape.normal.y, node2.shape.normal.z]],
+            [-node1.plateConstant, -node2.plateConstant]))
       return new THREE.Vector3( 0, solution[0], solution[1] )
     else if dir.y isnt 0
       solution = numeric.round(numeric.solve(
-            [[plate1[0].normal.x, plate1[0].normal.z],
-            [plate2[0].normal.x, plate2[0].normal.z]],
-            [-plate1[0].constant, -plate2[0].constant]))
+            [[node1.shape.normal.x, node1.shape.normal.z],
+            [node2.shape.normal.x, node2.shape.normal.z]],
+            [-node1.plateConstant, -node2.plateConstant]))
       return new THREE.Vector3( solution[0], 0, solution[1] )
     else if dir.z isnt 0
       solution = numeric.round(numeric.solve(
-            [[plate1[0].normal.x, plate1[0].normal.y],
-            [plate2[0].normal.x, plate2[0].normal.y]],
-            [-plate1[0].constant, -plate2[0].constant]))
+            [[node1.shape.normal.x, node1.shape.normal.y],
+            [node2.shape.normal.x, node2.shape.normal.y]],
+            [-node1.plateConstant, -node2.plateConstant]))
       return new THREE.Vector3( solution[0], solution[1], 0 )
     else
       console.log "can't solve the linear system.."
       return false
 
   isOnLine = (linePoint1, dir, pointToTest) ->
-    linePoint2 = new THREE.Vector3()
+    linePoint2 = new THREE.Vector3() # 2 points needed to define line
     linePoint2.addVectors(linePoint1, dir)
 
     #     |(p-p1) x (p-p2)|
@@ -71,22 +71,20 @@ class CreateGraph
     else
       return false
 
-  checkForBoundaryEdge: (dir, point, plate1, plate2) ->
+  checkForBoundaryEdge: (dir, point, node1, node2) ->
     # check distance of vertices to line. if distances 0 -> shared edge!
     pointsOnLine1 = []
     pointsOnLine2 = []
 
-    p1 = new Plate( new Shape( plate1, plate1[0].normal ), plate1[0].thickness )
-    p2 = new Plate( new Shape( plate2, plate2[0].normal ), plate2[0].thickness )
     onLineCounter1 = 0
-    for edgeLoop in plate1
+    for edgeLoop in node1.shape.edgeLoops
       for vertex in edgeLoop.vertices
         if isOnLine(vertex, dir, point)
           pointsOnLine1.push(vertex)
           onLineCounter1 = onLineCounter1 + 1
 
     onLineCounter2 = 0
-    for edgeLoop in plate2
+    for edgeLoop in node2.shape.edgeLoops
       for vertex in edgeLoop.vertices
         if isOnLine(vertex, dir, point)
           onLineCounter2 = onLineCounter2 + 1
@@ -101,16 +99,13 @@ class CreateGraph
       line = new THREE.Line( geometry, material )
       @newSceneElements.push( line )
       console.log 'added line'
-      @plateGraph.addNode(p1)
-      @plateGraph.addNode(p2)
-      connection = new Connection()
       #               n1 * n2
       # cos(alpha) = ---------
       #              |n1|*|n2| ( = 1 because normals are normalized )
-      numerator = plate1[0].normal.dot(plate2[0].normal)
+      numerator = node1.shape.normal.dot(node2.shape.normal)
       angle = Math.acos( numerator ) / (Math.PI / 180)
       console.log "Added connection with angle: #{angle}"
-      @plateGraph.addConnection(p1, p2, angle, null)
+      @plateGraph.addConnection(node1, node2, angle, null)
     else
       console.log 'not enough points on intersection'
 
@@ -118,29 +113,33 @@ class CreateGraph
     console.log 'calculations started'
 
     for plate in plates
-      for edgeLoop in plate
-        plane = @createPlane(
-                            edgeLoop.vertices[0]
-                            edgeLoop.vertices[1]
-                            edgeLoop.vertices[2])
-        edgeLoop.normal = plane.normal
-        edgeLoop.constant = plane.constant
+      # edgeLoop = plate.shape.getContour() # this works when holify has run #
+      edgeLoop = plate.shape.edgeLoops[0]
+      plane = @createPlane(
+                          edgeLoop.vertices[0]
+                          edgeLoop.vertices[1]
+                          edgeLoop.vertices[2])
+      plate.shape.normal = plane.normal
+      plate.plateConstant = plane.constant
+      @plateGraph.addNode(plate)
+    console.log 'finished creating nodes'
 
-    if plates? and (plates.length >= 2)
+    nodeList = @plateGraph.nodes
+    if nodeList? and (nodeList.length >= 2)
       console.log 'intersections possible'
-      for plate1, index in plates
-        if index + 1 < plates.length
-          for plate2 in plates[index + 1...plates.length]
-            console.log "testing #{plate1[0].name} with #{plate2[0].name}"
+      for node1, index in nodeList
+        if index + 1 < nodeList.length
+          for node2 in nodeList[index + 1...nodeList.length]
+            # console.log "testing #{plate1[0].name} with #{plate2[0].name}"
             dir = new THREE.Vector3()
             # only care about main sides:
-            dir.crossVectors(plate1[0].normal, plate2[0].normal)
+            dir.crossVectors(node1.shape.normal, node2.shape.normal)
             console.log "direction of possible intersection vector:
                    (#{dir.x}, #{dir.y}, #{dir.z})"
-            point = @findPointOnBothPlanes(dir, plate1, plate2)
+            point = @findPointOnBothPlanes(dir, node1, node2)
             if point isnt false
               console.log "point on plane: #{point}"
-              @checkForBoundaryEdge(dir, point, plate1, plate2)
+              @checkForBoundaryEdge(dir, point, node1, node2)
             else
               console.log 'There is no intersection'
     else

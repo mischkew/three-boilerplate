@@ -3,9 +3,10 @@ $ = require 'jquery'
 #OrbitControls = require('three-orbit-controls')(THREE)
 require('jquery-ui')
 numeric = require './numeric-1.2.6.js'
-Graph = require './createGraph'
-
-# see mdn Math for math functions
+GraphCreator = require './CreateGraph'
+Plate = require './Plate'
+Shape = require './Shape'
+EdgeLoop = require './EdgeLoop'
 
 view3d = $( '#3d-view' )
 view3d.height '100%'
@@ -28,7 +29,7 @@ renderer.setSize( window.innerWidth, window.innerHeight )
 sceneGraph = new THREE.Object3D()
 scene.add( sceneGraph )
 
-myObject = null
+myObject = []
 
 clearScene = ->
   sceneGraph.children = []
@@ -39,7 +40,7 @@ drawLines = ( object ) ->
 
   material = new THREE.LineBasicMaterial( color: 0xAAAAAA )
   for plate in object
-    for edgeLoop in plate
+    for edgeLoop in plate.shape.edgeLoops
       geometry = new THREE.Geometry()
       for vertex in edgeLoop.vertices
         geometry.vertices.push( vertex )
@@ -50,94 +51,61 @@ drawLines = ( object ) ->
       sceneGraph.add( line )
 
 
-btnScene1 = ( event ) ->
+btnScene = ( event ) ->
   event.preventDefault()
 
-  edgeLoop1 =
-    vertices: [
-      new THREE.Vector3( -3, -3, 0 )
-      new THREE.Vector3(  3, -3, 0 )
-      new THREE.Vector3(  3,  3, 0 )
-      new THREE.Vector3( -3,  3, 0 )
-    ]
-    name: '1'
-    thickness: 2
-    hole: false
-    normal: new THREE.Vector3()
-    constant: null
-    area: null # will be given but unimportant to me
+  console.log 'you clicked for Scene'
 
-  edgeLoop2 =
-    vertices: [
-      # new THREE.Vector3(  3,  3, 0 )
-      # new THREE.Vector3(  3, -3, 0 )
-      # new THREE.Vector3(  4, -3, 0 )
-      # new THREE.Vector3(  4,  3, 0 )
-      new THREE.Vector3(  3,  3,  0 )
-      new THREE.Vector3(  3, -3,  0 )
-      new THREE.Vector3(  3, -3, -1 )
-      new THREE.Vector3(  3,  3, -1 )
-    ]
-    name: '2'
-    thickness: 2
-    hole: false
-    normal: new THREE.Vector3()
-    constant: null
-    area: null # will be given but unimportant to me
+  edgeLoop1 = new EdgeLoop( [
+    new THREE.Vector3( -3, -3, 0 )
+    new THREE.Vector3(  3, -3, 0 )
+    new THREE.Vector3(  3,  3, 0 )
+    new THREE.Vector3( -3,  3, 0 )
+  ] )
+  edgeLoop2 = new EdgeLoop( [
+    new THREE.Vector3(  3,  3,  0 )
+    new THREE.Vector3(  3, -3,  0 )
+    new THREE.Vector3(  3, -3, -1 )
+    new THREE.Vector3(  3,  3, -1 )
+  ] )
+  edgeLoop3 = new EdgeLoop( [
+    new THREE.Vector3(  3,  3,  0 )
+    new THREE.Vector3( -3,  3,  0 )
+    new THREE.Vector3( -3,  3, -1 )
+    new THREE.Vector3(  3,  3, -1 )
+  ] )
+  edgeLoop4 = new EdgeLoop( [
+    new THREE.Vector3(  -3,  3,  0 )
+    new THREE.Vector3(  -3, -3,  0 )
+    new THREE.Vector3(  -3, -3, -1 )
+    new THREE.Vector3(  -3,  3, -1 )
+  ] )
+  edgeLoop5 = new EdgeLoop( [
+    new THREE.Vector3( -1.5, -1.5, 0 )
+    new THREE.Vector3(  1.5, -1.5, 0 )
+    new THREE.Vector3(  1.5,  1.5, 0 )
+    new THREE.Vector3( -1.5,  1.5, 0 )
+  ] )
 
-  edgeLoop3 =
-    vertices: [
-      new THREE.Vector3(  3,  3,  0 )
-      new THREE.Vector3( -3,  3,  0 )
-      new THREE.Vector3( -3,  3, -1 )
-      new THREE.Vector3(  3,  3, -1 )
-    ]
-    name: '3'
-    thickness: 2
-    hole: false
-    normal: new THREE.Vector3()
-    constant: null
-    area: null # will be given but unimportant to me
+  shape1 = new Shape( [ edgeLoop1, edgeLoop5 ], new THREE.Vector3())
+  shape2 = new Shape( [ edgeLoop2 ], new THREE.Vector3() )
+  shape3 = new Shape( [ edgeLoop3 ], new THREE.Vector3() )
+  shape4 = new Shape( [ edgeLoop4 ], new THREE.Vector3() )
 
-  edgeLoop4 =
-    vertices: [
-      new THREE.Vector3(  -3,  3,  0 )
-      new THREE.Vector3(  -3, -3,  0 )
-      new THREE.Vector3(  -3, -3, -1 )
-      new THREE.Vector3(  -3,  3, -1 )
-    ]
-    name: '4'
-    thickness: 2
-    hole: false
-    normal: new THREE.Vector3()
-    constant: null
-    area: null # will be given but unimportant to me
-
-  edgeLoop5 =
-    vertices: [
-      new THREE.Vector3( -1.5, -1.5, 0 )
-      new THREE.Vector3(  1.5, -1.5, 0 )
-      new THREE.Vector3(  1.5,  1.5, 0 )
-      new THREE.Vector3( -1.5,  1.5, 0 )
-    ]
-    name: '5'
-    thickness: 2
-    hole: true
-    normal: new THREE.Vector3()
-    constant: null
-    area: null # will be given but unimportant to me
-
-
-  plate1 = [ edgeLoop1, edgeLoop5 ]
-  plate2 = [ edgeLoop2 ]
-  plate3 = [ edgeLoop3 ]
-  plate4 = [ edgeLoop4 ]
+  plate1 = new Plate(shape1, 1, null)
+  plate2 = new Plate(shape2, 1, null)
+  plate3 = new Plate(shape3, 1, null)
+  plate4 = new Plate(shape4, 1, null)
 
   myObject = [ plate1, plate2, plate3, plate4 ]
-  # myObject = [ plate1, plate2 ]
 
   drawLines( myObject )
-  graphCreator = new Graph()
+
+
+btnCalculate = (event) ->
+  event.preventDefault()
+  reset()
+  graphCreator = new GraphCreator()
   sceneElements = graphCreator.createGraph(myObject, null)
   for element in sceneElements
     sceneGraph.add( element )
@@ -174,10 +142,12 @@ $(->
   view3d.height '100%'
   setupRenderSize()
   view3d.append $( renderer.domElement )
-  $('#btnScene1')
-    .button().click( btnScene1 ).text('Click for Scene')
-  $('#reset')
-   .button().click( reset ).text('Reset Scene')
+  $('#btnScene')
+    .button().click( btnScene ).text('Click for Scene')
+  $('#calculate')
+    .button().click( btnCalculate ).text('calculate plateGraph')
+  # $('#reset')
+  #  .button().click( reset ).text('Reset Scene')
 
 
   #controls = new OrbitControls( camera, renderer.domElement )
