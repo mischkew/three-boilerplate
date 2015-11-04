@@ -82,37 +82,38 @@ drawParallelLines = (object) ->
 btnScene = ( event ) ->
   event.preventDefault()
 
-  console.log 'you clicked for Scene'
+  # console.log 'you clicked for Scene'
+  thickness = 0.1
 
   edgeLoop1 = new EdgeLoop( [
-    new THREE.Vector3( -3, -3, 0 )
-    new THREE.Vector3(  3, -3, 0 )
-    new THREE.Vector3(  3,  3, 0 )
-    new THREE.Vector3( -3,  3, 0 )
+    new THREE.Vector3( -2, -2, 0 - thickness )
+    new THREE.Vector3(  2, -2, 0 - thickness )
+    new THREE.Vector3(  2,  2, 0 - thickness )
+    new THREE.Vector3( -2,  2, 0 - thickness )
   ] )
   edgeLoop2 = new EdgeLoop( [
-    new THREE.Vector3(  3,  3,  0 )
-    new THREE.Vector3(  3, -3,  0 )
-    new THREE.Vector3(  3, -3, -1 )
-    new THREE.Vector3(  3,  3, -1 )
+    new THREE.Vector3(  2,  2,  0 )
+    new THREE.Vector3(  2, -2,  0 )
+    new THREE.Vector3(  2, -2, -1 )
+    new THREE.Vector3(  2,  2, -1 )
   ] )
   edgeLoop3 = new EdgeLoop( [
-    new THREE.Vector3(  3,  3,  0 )
-    new THREE.Vector3( -3,  3,  0 )
-    new THREE.Vector3( -3,  3, -1 )
-    new THREE.Vector3(  3,  3, -1 )
+    new THREE.Vector3(  2,  2 + thickness,  0 )
+    new THREE.Vector3( -2,  2 + thickness,  0 )
+    new THREE.Vector3( -2,  2 + thickness, -1 )
+    new THREE.Vector3(  2,  2 + thickness, -1 )
   ] )
   edgeLoop4 = new EdgeLoop( [
-    new THREE.Vector3(  -3,  3,  0 )
-    new THREE.Vector3(  -3, -3,  0 )
-    new THREE.Vector3(  -3, -3, -1 )
-    new THREE.Vector3(  -3,  3, -1 )
+    new THREE.Vector3(  -2 - thickness,  2,  0 )
+    new THREE.Vector3(  -2 - thickness, -2,  0 )
+    new THREE.Vector3(  -2 - thickness, -2, -1 )
+    new THREE.Vector3(  -2 - thickness,  2, -1 )
   ] )
   edgeLoop5 = new EdgeLoop( [
-    new THREE.Vector3( -1.5, -1.5, 0 )
-    new THREE.Vector3(  1.5, -1.5, 0 )
-    new THREE.Vector3(  1.5,  1.5, 0 )
-    new THREE.Vector3( -1.5,  1.5, 0 )
+    new THREE.Vector3( -1, -1, 0 - thickness )
+    new THREE.Vector3(  1, -1, 0 - thickness )
+    new THREE.Vector3(  1,  1, 0 - thickness )
+    new THREE.Vector3( -1,  1, 0 - thickness )
   ] )
 
   shape1 = new Shape( [ edgeLoop1, edgeLoop5 ], new THREE.Vector3())
@@ -120,10 +121,10 @@ btnScene = ( event ) ->
   shape3 = new Shape( [ edgeLoop3 ], new THREE.Vector3() )
   shape4 = new Shape( [ edgeLoop4 ], new THREE.Vector3() )
 
-  plate1 = new Plate(shape1, 1, null)
-  plate2 = new Plate(shape2, 1, null)
-  plate3 = new Plate(shape3, 1, null)
-  plate4 = new Plate(shape4, 1, null)
+  plate1 = new Plate(shape1, thickness, null, null)
+  plate2 = new Plate(shape2, thickness, null, null)
+  plate3 = new Plate(shape3, thickness, null, null)
+  plate4 = new Plate(shape4, thickness, null, null)
 
   myObject = [ plate1, plate2, plate3, plate4 ]
 
