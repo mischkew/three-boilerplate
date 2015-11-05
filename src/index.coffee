@@ -123,7 +123,8 @@ $(->
           url = svg.getObjectURL()
           svgDownload = $ '#svgDownload'
           svgDownload.attr 'href', url
-          svgDownload.attr 'download', 'test.svg'
+          svgDownload.attr 'download', 'model.svg'
+          svgDownload.text 'Download SVG'
           # ======= SVG test =========
 
           clearScene()
