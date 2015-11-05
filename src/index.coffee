@@ -132,7 +132,7 @@ $(->
           # ======= SVG test =========
 
           # ======= Layout test =======
-          layouter = new ShapeLayouter 5
+          layouter = new ShapeLayouter 100
           layouter.addShapes shapes
           url = layouter.getObjectURL()
           setDownloadUrl url

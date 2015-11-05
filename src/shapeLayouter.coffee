@@ -5,8 +5,10 @@ class ShapeLayouter
   constructor: (maxWidth) ->
     @shapesWithOffset = []
     @maxWidth = maxWidth
+    @width = 0
     @height = 0
     @scale = 1.0
+    @margin = 2
 
   addShapes: ( shapes ) ->
     for shape in shapes
@@ -41,24 +43,26 @@ class ShapeLayouter
     @sortShapesByHeight()
     cursor = { x: 0.0, y: 0.0 }
     heightOfRow = 0.0
+    @width = 0
     for shape in @shapesWithOffset
       if cursor.x + shape.width <= @maxWidth
         shape.offsetX += cursor.x
         shape.offsetY += cursor.y
         if heightOfRow < shape.height then heightOfRow = shape.height
-        cursor.x += shape.width
+        cursor.x += shape.width + @margin
       else
         cursor.x = 0.0
-        cursor.y += heightOfRow
+        cursor.y += heightOfRow + @margin
         shape.offsetX += cursor.x
         shape.offsetY += cursor.y
-        cursor.x = shape.width
+        cursor.x = shape.width + @margin
         heightOfRow = shape.height
+      if cursor.x - @margin > @width then @width = cursor.x - @margin
       @height = cursor.y + heightOfRow
 
   getObjectURL: ->
     @layout()
-    svg = new SVG @maxWidth, @height
+    svg = new SVG @width, @height
     svg.addShapesWithOffset @shapesWithOffset
     url = svg.getObjectURL()
     return url
