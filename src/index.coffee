@@ -85,6 +85,12 @@ clearScene = ->
   while (root.children.length > 0)
     root.remove root.children[0]
 
+setDownloadUrl = ( url ) ->
+  svgDownload = $ '#svgDownload'
+  svgDownload.attr 'href', url
+  svgDownload.attr 'download', 'model.svg'
+  svgDownload.text 'Download SVG'
+
 ### INITIALIZATION ###
 $(->
   # ui helpers
@@ -122,15 +128,14 @@ $(->
           svg.scale = 1
           svg.addShape shapes[0]
           url = svg.getObjectURL()
-          svgDownload = $ '#svgDownload'
-          svgDownload.attr 'href', url
-          svgDownload.attr 'download', 'model.svg'
-          svgDownload.text 'Download SVG'
+          setDownloadUrl url
           # ======= SVG test =========
 
           # ======= Layout test =======
-          layouter = new ShapeLayouter 400
+          layouter = new ShapeLayouter 5
           layouter.addShapes shapes
+          url = layouter.getObjectURL()
+          setDownloadUrl url
           # ======= Layout test =======
 
           clearScene()

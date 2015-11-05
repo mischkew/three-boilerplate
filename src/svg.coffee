@@ -12,7 +12,14 @@ class SVG
     @shapes.push( shape )
 
   addShapes: ( shapes ) ->
-    @shapes.concat shapes
+    # @shapes.concat shapes
+    for shape in shapes
+      @shapes.push shape
+
+  addShapesWithOffset: ( shapesWithOffset ) ->
+    # @shapes.concat shapesWithOffset
+    for shape in shapesWithOffset
+      @shapes.push shape
 
   getObjectURL: ->
     text = ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n
@@ -35,17 +42,24 @@ class SVG
          \t\t\t\tx="0"\n
          \t\t\t\ty="0" />
          \n'
-    console.log @shapes
-    for shape in @shapes
+    for shape, i in @shapes
+      offsetX = 0.0
+      offsetY = 0.0
+      if shape.shape?
+        offsetX = shape.offsetX
+        offsetY = shape.offsetY
+        shape = shape.shape
       text.push '\t\t\t\t<path
         style="fill:none;
         stroke:#ff0000;
-        stroke-width:1pt"\n
+        stroke-width:0.01pt"\n
         \t\t\t\t\td="'
       for edgeLoop in shape.getEdgeLoops()
         text.push 'M '
         for vertex in edgeLoop.xyPlaneVertices
-          text.push "#{vertex.x * @scale},#{vertex.y * @scale} "
+          x = (vertex.x + offsetX) * @scale
+          y = (vertex.y + offsetY) * @scale
+          text.push "#{x},#{y} "
         text.push 'z\n\t\t\t\t\t'
       text.push '"/>\n'
     text.push '</svg>'

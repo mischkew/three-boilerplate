@@ -1,4 +1,4 @@
-
+SVG = require './svg'
 
 class ShapeLayouter
 
@@ -14,12 +14,10 @@ class ShapeLayouter
         shape: shape, offsetX: 0.0, offsetY: 0.0, width: 0.0, height: 0.0 }
       @findBoundsAndSetToOrigin shapesWithOffset
       @shapesWithOffset.push shapesWithOffset
-    @sortShapesByHeight()
-    console.log @shapesWithOffset
 
   findBoundsAndSetToOrigin: (shapesWithOffset) ->
     shape = shapesWithOffset.shape
-    edgeLoop = shape.edgeLoops[0].xyPlaneVertices
+    edgeLoop = shape.getContour().xyPlaneVertices
     leftmostVertexX = edgeLoop[0].x
     rightmostVertexX = edgeLoop[0].x
     bottommostVtertexY = edgeLoop[0].y
@@ -32,18 +30,38 @@ class ShapeLayouter
       if vertex.y > topmostVtertexY then topmostVtertexY = vertex.y
     shapesWithOffset.offsetX = -leftmostVertexX
     shapesWithOffset.offsetY = -bottommostVtertexY
-    shapesWithOffset.width = topmostVtertexY - bottommostVtertexY
-    shapesWithOffset.height = rightmostVertexX - leftmostVertexX
+    shapesWithOffset.width = rightmostVertexX - leftmostVertexX
+    shapesWithOffset.height = topmostVtertexY - bottommostVtertexY
 
   sortShapesByHeight: ->
     @shapesWithOffset.sort (a, b) ->
-      return if a.height >= b.height then 1 else -1
+      return if a.height <= b.height then 1 else -1
 
   layout: ->
-    console.log ''
+    @sortShapesByHeight()
+    cursor = { x: 0.0, y: 0.0 }
+    heightOfRow = 0.0
+    for shape in @shapesWithOffset
+      if cursor.x + shape.width <= @maxWidth
+        shape.offsetX += cursor.x
+        shape.offsetY += cursor.y
+        if heightOfRow < shape.height then heightOfRow = shape.height
+        cursor.x += shape.width
+      else
+        cursor.x = 0.0
+        cursor.y += heightOfRow
+        shape.offsetX += cursor.x
+        shape.offsetY += cursor.y
+        cursor.x = shape.width
+        heightOfRow = shape.height
+      @height = cursor.y + heightOfRow
 
   getObjectURL: ->
-    console.log ''
+    @layout()
+    svg = new SVG @maxWidth, @height
+    svg.addShapesWithOffset @shapesWithOffset
+    url = svg.getObjectURL()
+    return url
 
 
 module.exports = ShapeLayouter
