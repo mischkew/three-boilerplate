@@ -13,6 +13,7 @@ CoplanarFaces = require './coplanarFaces'
 HoleDetector = require './holeDetection'
 meshlib = require 'meshlib'
 Util = require './utilityFunctions'
+SVG = require './svg'
 
 ### SCENE SETUP ###
 
@@ -114,6 +115,17 @@ $(->
 
           holeDetector = new HoleDetector()
           holeDetector.detectHoles( shapes )
+
+          # ======= SVG test =========
+          svg = new SVG 400, 300
+          svg.scale = 1
+          svg.addShape shapes[0]
+          url = svg.getObjectURL()
+          svgDownload = $ '#svgDownload'
+          svgDownload.attr 'href', url
+          svgDownload.attr 'download', 'model.svg'
+          svgDownload.text 'Download SVG'
+          # ======= SVG test =========
 
           clearScene()
           coplanarFaces.setupDrawable()
