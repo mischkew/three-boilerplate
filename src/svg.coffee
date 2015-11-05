@@ -6,6 +6,7 @@ class SVG
     @shapes = []
     @width = width
     @height = height
+    @scale = 1.0
 
   addShape: ( shape ) ->
     @shapes.push( shape )
@@ -43,8 +44,8 @@ class SVG
         \t\t\t\t\td="'
       for edgeLoop in shape.getEdgeLoops()
         text.push 'M '
-        for vertex in edgeLoop.vertices
-          text.push "#{vertex.x},#{vertex.y} "
+        for vertex in edgeLoop.xyPlaneVertices
+          text.push "#{vertex.x * @scale},#{vertex.y * @scale} "
         text.push 'z\n\t\t\t\t\t'
       text.push '"/>\n'
     text.push '</svg>'

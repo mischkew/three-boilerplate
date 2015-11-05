@@ -91,31 +91,6 @@ $(->
     orientation: 'vertical'
   })
 
-  # ======= SVG test =========
-  svg = new SVG(300, 400)
-  svgEdgeLoop1 = new EdgeLoop([
-    new THREE.Vector3( 20, 20, 0)
-    new THREE.Vector3( 20, 50, 0)
-    new THREE.Vector3( 50, 50, 0)
-    new THREE.Vector3( 50, 20, 0)
-  ])
-  svgEdgeLoop2 = new EdgeLoop([
-    new THREE.Vector3( 30, 30, 0)
-    new THREE.Vector3( 30, 40, 0)
-    new THREE.Vector3( 40, 40, 0)
-    new THREE.Vector3( 40, 30, 0)
-  ])
-  svgShape = new Shape([svgEdgeLoop1, svgEdgeLoop2])
-  svg.addShape svgShape
-  url = svg.getObjectURL()
-  svgDownload = $( '#svgDownload' )
-  svgDownload.attr(
-    'href'
-    url
-    )
-  svgDownload.attr( 'download', 'test.svg' )
-  # ======= SVG test =========
-
   view3d = $ '#3d-view'
   $('body')
     .on 'drop', (event) ->
@@ -140,6 +115,16 @@ $(->
 
           holeDetector = new HoleDetector()
           holeDetector.detectHoles( shapes )
+
+          # ======= SVG test =========
+          svg = new SVG 400, 300
+          svg.scale = 1
+          svg.addShape shapes[0]
+          url = svg.getObjectURL()
+          svgDownload = $ '#svgDownload'
+          svgDownload.attr 'href', url
+          svgDownload.attr 'download', 'test.svg'
+          # ======= SVG test =========
 
           clearScene()
           coplanarFaces.setupDrawable()
