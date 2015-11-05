@@ -14,6 +14,7 @@ HoleDetector = require './holeDetection'
 meshlib = require 'meshlib'
 Util = require './utilityFunctions'
 SVG = require './svg'
+ShapeLayouter = require './shapeLayouter'
 
 ### SCENE SETUP ###
 
@@ -126,6 +127,11 @@ $(->
           svgDownload.attr 'download', 'model.svg'
           svgDownload.text 'Download SVG'
           # ======= SVG test =========
+
+          # ======= Layout test =======
+          layouter = new ShapeLayouter 400
+          layouter.addShapes shapes
+          # ======= Layout test =======
 
           clearScene()
           coplanarFaces.setupDrawable()
