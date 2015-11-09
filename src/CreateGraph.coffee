@@ -22,23 +22,22 @@ class CreateGraph
     plane.setFromCoplanarPoints(vertex1, vertex2, vertex3)
     return plane
 
+  signOf: (vector)  ->
+    sign = 1
+    if vector.x < 0 or vector.y < 0 or vector.z < 0
+      sign = -1
+    return sign
+
   findPointOnBothPlanes: (dir, node1, node2, isMain) ->
     # solve underdetermined linear system (therefore set one value to 0)
-
     if( isMain )
       plate1Constant = node1.plateConstant
       plate2Constant = node2.plateConstant
     else
-      normal1 = node1.shape.normal
-      factor1 = 1
-      factor2 = 1
-      normal2 = node2.shape.normal
-      if normal1.x < 0 or normal1.y < 0 or normal1.z < 0
-        factor1 = -1
-      if normal2.x < 0 or normal2.y < 0 or normal2.z < 0
-        factor2 = -1
-      plate1Constant = node1.plateConstant + ( node1.thickness * factor1 )
-      plate2Constant = node2.plateConstant + ( node2.thickness * factor2 )
+      sign1 = @signOf(node1.shape.normal)
+      sign2 = @signOf(node2.shape.normal)
+      plate1Constant = node1.plateConstant + ( node1.thickness * sign1 )
+      plate2Constant = node2.plateConstant + ( node2.thickness * sign2 )
 
     if dir.x isnt 0
       solution = numeric.round(numeric.solve(
@@ -66,97 +65,128 @@ class CreateGraph
     linePoint2 = new THREE.Vector3() # 2 points needed to define line
     linePoint2.addVectors(linePoint1, dir)
 
-    #     |(p-p1) x (p-p2)|
-    # d = ------------------
-    #       |(p2-p1)|
+    # distance calculation:
+    #     |(p-p1) x (p-p2)|     | pp1 x pp2 |
+    # d = ------------------ = --------------
+    #       |(p2-p1)|               p2p1
 
     pp1 = new THREE.Vector3()
-    pp1.subVectors(pointToTest, linePoint1)
     pp2 = new THREE.Vector3()
-    pp2.subVectors(pointToTest, linePoint2)
-    cross = new THREE.Vector3()
-    cross.crossVectors(pp1, pp2)
-    numerator = cross.length()
-
     p2p1 = new THREE.Vector3()
-    p2p1.subVectors(linePoint2, linePoint1)
-    denominator = p2p1.length()
+    cross = new THREE.Vector3()
 
+    pp1.subVectors(pointToTest, linePoint1)
+    pp2.subVectors(pointToTest, linePoint2)
+    cross.crossVectors(pp1, pp2)
+    p2p1.subVectors(linePoint2, linePoint1)
+
+    numerator = cross.length()
+    denominator = p2p1.length()
     distance = numerator / denominator
+
     if distance is 0
       return true
     else
       return false
 
+  addLine: (point1, point2) ->
+    material = new THREE.LineBasicMaterial( color: 0x0000ff )
+    geometry = new THREE.Geometry()
+    geometry.vertices.push( point1, point2 )
+    line = new THREE.Line( geometry, material )
+    @newSceneElements.push( line )
+
+  addConnection: (node1, node2) ->
+    # angle calculation:
+    #               n1 * n2
+    # cos(alpha) = ---------
+    #              |n1|*|n2| ( = 1 because normals are normalized )
+    numerator = node1.shape.normal.dot(node2.shape.normal)
+    angle = Math.acos( numerator ) / (Math.PI / 180)
+    # console.log "Added connection with angle: #{angle}"
+    @plateGraph.addConnection(node1, node2, angle, null)
+
+  isPointOnPlane: (vertex, node) ->
+    normal = node.shape.normal
+    sign = @signOf(normal)
+    # check both: original and parallel plane
+    factor1 = new THREE.Vector3()
+    factor2 = new THREE.Vector3()
+    supportVector = new THREE.Vector3()
+    supportVector.copy( node.shape.edgeLoops[0].vertices[0] )
+    factor1.subVectors( vertex, supportVector )
+    factor2.subVectors( vertex, supportVector.addScalar(sign * node.thickness))
+    distance1 = factor1.dot(normal)
+    distance2 = factor2.dot(normal)
+    return ( distance1 is 0 or distance2 is 0)
+
+  getAllVerticesFor: (node) ->
+    vertices = []
+    for edgeLoop in node.shape.edgeLoops
+      for vertex in edgeLoop.vertices
+        vertices.push( vertex )
+        translatedVertex = new THREE.Vector3()
+        translation = new THREE.Vector3()
+
+        # original vertices
+        translatedVertex.copy( vertex )
+        translation.copy( node.shape.normal )
+
+        # parallel vertices
+        vertices.push( translatedVertex.add(
+          translation.multiplyScalar( node.thickness )
+          ))
+
+    return vertices
+
   checkForBoundaryEdge: (dir, point, node1, node2) ->
     # check distance of vertices to line. if distances 0 -> shared edge!
+
+    # add original shape points and parallel points
+    verticesToTest1 = @getAllVerticesFor(node1)
+    verticesToTest2 = @getAllVerticesFor(node2)
+
     pointsOnLine1 = []
-    pointsOnLine2 = []
-
-    verticesToTest1 = []
-    for edgeLoop in node1.shape.edgeLoops
-      for vertex in edgeLoop.vertices
-        verticesToTest1.push( vertex )
-        translatedVertex = new THREE.Vector3()
-        translatedVertex.copy( vertex )
-        translation = new THREE.Vector3()
-        translation.copy( node1.shape.normal )
-        verticesToTest1.push( translatedVertex.add(
-          translation.multiplyScalar( node1.thickness )
-          ) )
-
-    verticesToTest2 = []
-    for edgeLoop in node2.shape.edgeLoops
-      for vertex in edgeLoop.vertices
-        verticesToTest2.push( vertex )
-        translatedVertex = new THREE.Vector3()
-        translatedVertex.copy( vertex )
-        translation = new THREE.Vector3()
-        translation.copy( node2.shape.normal )
-        verticesToTest2.push( translatedVertex.add(
-          translation.multiplyScalar( node2.thickness )
-          ) )
-
-    onLineCounter1 = 0
     for vertex in verticesToTest1
       if isOnLine(point, dir, vertex)
-        # console.log "#{vertex.x}, #{vertex.y}, #{vertex.z} is onLine"
         pointsOnLine1.push(vertex)
-        onLineCounter1 = onLineCounter1 + 1
 
-    # console.log '_______________________________'
-
-    onLineCounter2 = 0
+    pointsOnLine2 = []
     for vertex in verticesToTest2
       if isOnLine(point, dir, vertex)
-        # console.log "#{vertex.x}, #{vertex.y}, #{vertex.z} is onLine"
-        onLineCounter2 = onLineCounter2 + 1
-    #
-    # console.log "counter1: #{onLineCounter1}, counter2: #{onLineCounter2}"
+        pointsOnLine2.push(vertex)
 
-    if onLineCounter1 >= 2 and onLineCounter2 >= 2
-      # console.log 'found an intersection'
-      material = new THREE.LineBasicMaterial( color: 0x0000ff )
+    # lines match
+    if pointsOnLine1.length >= 2 and pointsOnLine2.length >= 2
+      @addLine( pointsOnLine1[0], pointsOnLine1[1] )
+      line = new THREE.Line3()
+      line.set( pointsOnLine1[0], pointsOnLine1[1] )
+      @addConnection(node1, node2, line)
 
-      geometry = new THREE.Geometry()
-      geometry.vertices.push( pointsOnLine1[0], pointsOnLine1[1] )
+    # line lies somewhere in other plane
+    else if pointsOnLine1.length >= 2
+      if (
+            @isPointOnPlane(pointsOnLine1[0], node2) and
+            @isPointOnPlane(pointsOnLine1[1], node2)
+          )
+        @addLine(pointsOnLine1[0], pointsOnLine1[1])
+        line = new THREE.Line3()
+        line.set( pointsOnLine1[0], pointsOnLine1[1] )
+        @addConnection(node1, node2, line)
 
-      line = new THREE.Line( geometry, material )
-      @newSceneElements.push( line )
-      # console.log 'added line'
-      #               n1 * n2
-      # cos(alpha) = ---------
-      #              |n1|*|n2| ( = 1 because normals are normalized )
-      numerator = node1.shape.normal.dot(node2.shape.normal)
-      angle = Math.acos( numerator ) / (Math.PI / 180)
-      # console.log "Added connection with angle: #{angle}"
-      @plateGraph.addConnection(node1, node2, angle, null)
+    else if pointsOnLine2.length >= 2
+      if (
+            @isPointOnPlane(pointsOnLine2[0], node1) and
+            @isPointOnPlane(pointsOnLine2[1], node1)
+          )
+        @addLine(pointsOnLine2[0], pointsOnLine2[1])
+        line = new THREE.Line3()
+        line.set( pointsOnLine2[0], pointsOnLine2[1] )
+        @addConnection(node1, node2, line)
     else
       # console.log 'not enough points on intersection'
 
   findIntersection: (plates) ->
-    # console.log 'calculations started'
-
     for plate, index in plates
       # edgeLoop = plate.shape.getContour() # this works when holify has run
       edgeLoop = plate.shape.edgeLoops[0]
@@ -166,7 +196,7 @@ class CreateGraph
                           edgeLoop.vertices[2])
       plate.shape.normal = plane.normal # will be given by Lucas
       plate.plateConstant = plane.constant # will be given by Lucas
-      plate.name = index
+      plate.name = index # just for nice output
       @plateGraph.addNode(plate)
     # console.log 'finished creating nodes'
 
@@ -178,14 +208,12 @@ class CreateGraph
           for node2 in nodeList[index + 1...nodeList.length]
             dir = new THREE.Vector3()
             dir.crossVectors(node1.shape.normal, node2.shape.normal)
-            # handle original main side:
+            # handle original(0) and parallel(1) main side:
             # find point as support vector for defining intersection line
-            point1 = @findPointOnBothPlanes(dir, node1, node2, true)
-            point2 = @findPointOnBothPlanes(dir, node1, node2, false)
+            point1 = @findPointOnBothPlanes(dir, node1, node2, 0)
+            point2 = @findPointOnBothPlanes(dir, node1, node2, 1)
             if point1 isnt false
               @checkForBoundaryEdge(dir, point1, node1, node2)
-            # handle intersections with parallel main side:
-            # find point as support vector for defining intersection line
             else if point2 isnt false
               @checkForBoundaryEdge(dir, point2, node1, node2)
             else

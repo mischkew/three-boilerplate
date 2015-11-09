@@ -98,16 +98,16 @@ btnScene = ( event ) ->
     new THREE.Vector3(  2,  2, -1 )
   ] )
   edgeLoop3 = new EdgeLoop( [
-    new THREE.Vector3(  2,  2 + thickness,  0 )
+    new THREE.Vector3(  3,  2 + thickness,  0 )
     new THREE.Vector3( -2,  2 + thickness,  0 )
     new THREE.Vector3( -2,  2 + thickness, -1 )
-    new THREE.Vector3(  2,  2 + thickness, -1 )
+    new THREE.Vector3(  3,  2 + thickness, -1 )
   ] )
   edgeLoop4 = new EdgeLoop( [
     new THREE.Vector3(  -2 - thickness,  2,  0 )
     new THREE.Vector3(  -2 - thickness, -2,  0 )
-    new THREE.Vector3(  -2 - thickness, -2, -1 )
-    new THREE.Vector3(  -2 - thickness,  2, -1 )
+    new THREE.Vector3(  -2 - thickness, -2, -2 )
+    new THREE.Vector3(  -2 - thickness,  2, -2 )
   ] )
   edgeLoop5 = new EdgeLoop( [
     new THREE.Vector3( -1, -1, 0 - thickness )
@@ -115,18 +115,26 @@ btnScene = ( event ) ->
     new THREE.Vector3(  1,  1, 0 - thickness )
     new THREE.Vector3( -1,  1, 0 - thickness )
   ] )
+  edgeLoop6 = new EdgeLoop( [
+    new THREE.Vector3(  -2 - thickness, -2.5,  -0.5 )
+    new THREE.Vector3(  -2 - thickness, -2.5,  0 )
+    new THREE.Vector3(  -1 - thickness, -2.5,  0 )
+    new THREE.Vector3(  -1 - thickness, -2.5,  -0.5 )
+  ] )
 
   shape1 = new Shape( [ edgeLoop1, edgeLoop5 ], new THREE.Vector3())
   shape2 = new Shape( [ edgeLoop2 ], new THREE.Vector3() )
   shape3 = new Shape( [ edgeLoop3 ], new THREE.Vector3() )
   shape4 = new Shape( [ edgeLoop4 ], new THREE.Vector3() )
+  shape5 = new Shape( [ edgeLoop6 ], new THREE.Vector3() )
 
   plate1 = new Plate(shape1, thickness, null, null)
   plate2 = new Plate(shape2, thickness, null, null)
   plate3 = new Plate(shape3, thickness, null, null)
   plate4 = new Plate(shape4, thickness, null, null)
+  plate5 = new Plate(shape5, thickness, null, null)
 
-  myObject = [ plate1, plate2, plate3, plate4 ]
+  myObject = [ plate1, plate2, plate3, plate4, plate5 ]
 
   drawLines( myObject )
   drawParallelLines( myObject )
